@@ -1,0 +1,23 @@
+1. 
+My platform is Mac OS X
+
+2.
+When I implemented the clipping window, I found the end points of the line in the clipping window were weird and they didn't fit the line. Afterwards, I found that this was because the end points of the clipped line are represented in floating point number and this caused problems for the midpoint algorithm. Therefore, I first round the values of the end points and then draw the line. The problem is solved.
+
+Line anti-aliasing:
+fmid(x, y) 		= 	dx * y - dy * x + C
+fmid(x, y+1)	= 	dx * (y+1) - dy * x + C
+				=	fmid(x, y) + dx
+If fmid(x, y) < 0, the pixel beyond the current one is turned on and if
+fmid(x, y) >0, the pixel under the current one is turned on. Therefore,
+fmid(x, y) and fmid(x, y+1) always have the opposite sign. So abs(fmid(x, y))
++ abs(fmid(x, y+/-1)) = dx. Hence, the alpha value for the current pixel is
+splitted into two pixel and the values are abs(fmid(x,y)) * alpha / dx and
+abs(fmid(x, y+/-1)) * alpha / dy. 
+
+3.
+My scene is called "Fishing". It simulate the reflection of the water.
+
+4.
+The base code for project assignment is not stable and the program crashes
+several times such that I can't finish all what I want.

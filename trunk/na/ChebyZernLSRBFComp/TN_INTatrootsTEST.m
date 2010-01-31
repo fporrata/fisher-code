@@ -1,0 +1,1 @@
+% TN_INTatrootsTEST.mclearN=15a= 0b=4f=inline('x^12','x');[wquad,xquad] = TN_INTatroots(N,a,b);% integral of f(x) is   int_{a}^{b} f(x) dx \approx sum_{k=1}^{N} %                                                                  f(xquad(k)) * wquad(k)II=0;for k=1:N	II = II + wquad(k) * f( xquad(k));end % kII

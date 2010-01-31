@@ -79,4 +79,4 @@ plot(numQuad, log10(errors), 'k', 'LineWidth', 2);
 xlabel('Number of quadrature points', 'FontSize', 14);
 ylabel('log10 of interpolation errors', 'FontSize', 14);
 %title(sprintf('Zernike Interpolation of %s', func_str), 'FontSize', 14);
-title('Zernike Interpolation of 1 / (1 + 3 ^ {2} * r ^ {2})', 'FontSize', 14);
+title('Zernike Interpolation of 1 / (1 + 3^{2} * r^{2})', 'FontSize', 14);

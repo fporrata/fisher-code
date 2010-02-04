@@ -15,7 +15,6 @@ public:
 	void detectEdges(cv::Mat & edges);
 	void detectEdges(const cv::Mat & img, cv::Mat & edges);
 	//void detectEdges(QImage & qEdges);
-	void dummy(int i){}
 	
 	virtual ~EdgeDector(){}
 
@@ -36,8 +35,14 @@ public:
 				cv::Mat & edges,
 				double low,
 				double high,
-				double apertureSize,
-				bool L2gradient);
+				double apertureSize = 3,
+				bool L2gradient = false);
+	CannyDector(const char * filename,
+				cv::Mat & edges,
+				double low,
+				double high,
+				double apertureSize = 3,
+				bool L2gradient = false);
 
 	// Set the parameter of Canny edge detection
 	void setLowThresh(double low);

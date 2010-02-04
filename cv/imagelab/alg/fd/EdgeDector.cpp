@@ -35,7 +35,6 @@ CannyDector::CannyDector(const cv::Mat & img) : EdgeDector(img)
 CannyDector::CannyDector(const char * filename)
 {
 	img = cv::imread(filename, 0);
-	dummy(0);
 	init();
 }
 
@@ -48,9 +47,21 @@ CannyDector::CannyDector(const cv::Mat & img,
 {
 	setParam(low, high, apertureSize, L2gradient);
 	//EdgeDector::detectEdges(img, edges);
-	detectEdges(img, edges);
+	detectEdges(edges);
 }
 
+CannyDector::CannyDector(const char * filename,
+						 cv::Mat & edges,
+						 double low,
+						 double high,
+						 double apertureSize,
+						 bool L2gradient)
+{
+	img = cv::imread(filename, 0);
+	setParam(low, high, apertureSize, L2gradient);
+	detectEdges(edges);
+}
+	
 void CannyDector::init()
 {
 			lowThresh = 100;

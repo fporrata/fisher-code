@@ -369,7 +369,7 @@ std::ostream& operator<<( std::ostream& os, const XMat<dim, real_type>& c )
 {	
 	for(int i=0; i<dim; ++i) {
 		for(int j=0; j<dim; ++j)
-			os << c(j,i) << " ";
+			os << c(i,j) << " ";
 		os << std::endl;
 	}
 	return os;

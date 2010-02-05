@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D version='3.0' profile='Immersive' xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <head>
+    <meta content='Figure15.16ExtrudedLipstick.x3d' name='title'/>
+    <meta content='Figure 15.16, The VRML 2.0 Sourcebook, Copyright [1997] By Andrea L. Ames, David R. Nadeau, and John L. Moreland' name='creator'/>
+    <meta content='Don Brutzman' name='translator'/>
+    <meta content='20 August 2000' name='created'/>
+    <meta content='15 September 2002' name='modified'/>
+    <meta content='A lipstick shape created by rotating a circular cross section about the X axis as it is extruded.' name='description'/>
+    <meta content='http://www.web3d.org/x3d/content/examples/Vrml2.0Sourcebook/Chapter15-Extrusion/Figure15.16ExtrudedLipstick.x3d' name='identifier'/>
+    <meta content='X3D-Edit, http://www.web3d.org/x3d/content/README.X3D-Edit.html' name='generator'/>
+    <meta name='license' content='../../license.html'/>
+  </head>
+  <Scene>
+    <!-- Computational cost of Extrusion compared to IndexedFaceSet: quicker to download, takes time to calculate polygonal faces and normals during initial loading, equally fast at run time. -->
+    <!-- Authoring capabilities of Extrusion compared to IndexedFaceSet: can be more complicated to express, but also can provide great detail with much less effort. -->
+    <!-- First position and rotate viewpoint into positive-X-Y-Z octant using a Transform -->
+    <Transform rotation='0 1 0 0.758' translation='10 5 10'>
+      <Viewpoint description='Lipstick using extrusion orientation' orientation='1 0 0 -0.3' position='0 0 0'/>
+    </Transform>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor='1 0 0.3' emissiveColor='0.1 0.03 0.03' shininess='0.4' specularColor='0.4 0.4 0.5'/>
+      </Appearance>
+      <Extrusion creaseAngle='1.57' crossSection=' 1.00  0.00,   0.92 -0.38,&#xA; 0.71 -0.71,   0.38 -0.92,&#xA; 0.00 -1.00,  -0.38 -0.92,&#xA;-0.71 -0.71,  -0.92 -0.38,&#xA;-1.00 -0.0,   -0.92  0.38,&#xA;-0.71  0.71,  -0.38  0.92,&#xA; 0.00  1.00,   0.38  0.92,&#xA; 0.71  0.71,   0.92  0.38,&#xA; 1.00  0.00' orientation='0.0 1.0 0.0 0.0,  1.0 0.0 0.0 0.785' spine='0 0 0, 0 4 0'/>
+    </Shape>
+  </Scene>
+</X3D>

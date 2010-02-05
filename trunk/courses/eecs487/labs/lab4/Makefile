@@ -19,7 +19,7 @@ tgz: lab4.pdf Makefile viewLights.cpp xvec.h xmat.h fakeGL.h
 test: testCase.o
 	$(CXX) $(CFLAGS) -o $@ viewLights.o $(LIBS)
 
-%.o: %.cpp
+%.o: %.cpp fakeGL.h
 	$(CC) $(CFLAGS) -c $<
 
 .PHONY: clean

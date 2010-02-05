@@ -107,9 +107,11 @@ void keyb(unsigned char key, int x, int y) {
 			break;
 		case 'd':
 			/* YOUR CODE HERE */
+			position -= right * 0.2f;
 			break;
 		case 'a':
 			/* YOUR CODE HERE */
+			position += right * 0.2f;
 			break;
 		default:
 			break;
@@ -138,12 +140,15 @@ void motion(int x, int y) {
 	
 	/* The amount the mouse moved in x,
 	 scaled to make it a smaller number */
-	float dx = (float)displacement.x()*-0.005f;
+	float dx = (float)displacement.x()*-0.05f;
 	
 	/* Rotate the gaze direction (from when click began)
 	 around the top vector by dx */
+	//cout << "gaze " << gazeDir << endl << endl;
 	gazeDir = prevGazeDir.rotate(topDir, dx);
-	
+	position = position.rotate(topDir, dx);
+	prevGazeDir = gazeDir;
+	//cout << "current gaze " << gazeDir << endl << endl;
 	/* YOUR CODE HERE */
 	/* Implement pitch (nose up and down). Use the previous top direction
 	 and the 'current' gaze direction calculated above. This should
@@ -153,6 +158,19 @@ void motion(int x, int y) {
 	/* Here is the right vector in case: */
 	XVec3f right = gazeDir.cross(topDir);
 	right.normalize();
+	float dy = (float)displacement.y()*-0.05f;
+	//cout << "dy " << dy << endl << endl;
+	//cout << "gaze " << gazeDir << endl << endl;
+	gazeDir = prevGazeDir.rotate(right, dy);
+	//cout << "current gaze " << gazeDir << endl << endl;
+	topDir = prevTopDir.rotate(right, dy);
+	//cout << "Position " << position << endl << endl;
+	position = position.rotate(right, dy);
+	//cout << "Current position " << position << endl << endl;
+
+	prevGazeDir = gazeDir;
+	prevTopDir = topDir;
+	mouseDown = XVec2i(x, y);
 	
 	glutPostRedisplay();
 }
@@ -184,9 +202,13 @@ int main (int argc, char *argv[]) {
 	/* gives the two light some color */
 	GLfloat color[4] = {0.0, 0.0, 1.0, 1.0};
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+	GLfloat pos[4] = {0.0, 2.0, 0.0, 1.0};
+	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	
 	GLfloat color2[4] = {1.0, 0.0, 0.0, 1.0};
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, color2);
+	GLfloat pos2[4] = {0.0, 0.0, 0.0, 1.0};
+	glLightfv(GL_LIGHT1, GL_POSITION, pos2);
 
 	/* give the second light some attenuation,
 	 that is, it's effect is distance-dependent */
@@ -229,6 +251,18 @@ void drawSphere() {
 			
 			_glNormal3f(sinf(theta)*sinf(phiNext), cosf(theta), sinf(theta)*cosf(phiNext));
 			_glVertex3f(sinf(theta)*sinf(phiNext), cosf(theta), sinf(theta)*cos(phiNext));
+/*glNormal3f(sinf(theta)*sinf(phi), cosf(theta), sinf(theta)*cosf(phi));
+			glVertex3f(sinf(theta)*sinf(phi), cosf(theta), sinf(theta)*cosf(phi));
+			
+			glNormal3f(sinf(thetaNext)*sinf(phi), cosf(thetaNext), sinf(thetaNext)*cosf(phi));
+			glVertex3f(sinf(thetaNext)*sinf(phi), cosf(thetaNext), sinf(thetaNext)*cosf(phi));
+			
+			glNormal3f(sinf(thetaNext)*sinf(phiNext), cosf(thetaNext), sinf(thetaNext)*cosf(phiNext));
+			glVertex3f(sinf(thetaNext)*sinf(phiNext), cosf(thetaNext), sinf(thetaNext)*cosf(phiNext));
+			
+			glNormal3f(sinf(theta)*sinf(phiNext), cosf(theta), sinf(theta)*cosf(phiNext));
+			glVertex3f(sinf(theta)*sinf(phiNext), cosf(theta), sinf(theta)*cos(phiNext));*/
+
 		}
 	}
 	glEnd();

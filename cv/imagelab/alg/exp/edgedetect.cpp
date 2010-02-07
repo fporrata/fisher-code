@@ -23,9 +23,10 @@ int main (int argc, char * argv[])
 
 	imshow("Image", edges);
 	string destImage = argv[1];
-	destImage = destImage.substr(destImage.find_last_of("\\/")+1);
+	destImage = "results/edges_" +
+		destImage.substr(destImage.find_last_of("\\/")+1);
 	//cout << destImage << endl;
-	imwrite(string("edges_"+string(destImage)).c_str(), edges);
+	imwrite(destImage, edges);
 
 	waitKey(0);
 }

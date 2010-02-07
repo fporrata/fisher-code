@@ -1,4 +1,4 @@
-CXXFLAGS		:= -I ../fd -bind_at_load `pkg-config --cflags opencv` \
+CXXFLAGS		:= -I ../fd `pkg-config --cflags opencv` \
 					`pkg-config --libs opencv`
 
 MAIN		:= edgedetect

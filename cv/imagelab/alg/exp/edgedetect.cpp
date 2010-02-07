@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <cstdlib>
 
 #include "EdgeDector.h"
@@ -18,10 +19,13 @@ int main (int argc, char * argv[])
 
 	namedWindow("Image", 1);
 	
-	CannyDector("yufu.jpg", edges, 400.0, 650.0, 5, true);
+	CannyDector(argv[1], edges, 400.0, 650.0, 5, true);
 
 	imshow("Image", edges);
-	imwrite("yufu_edges.jpg", edges);
+	string destImage = argv[1];
+	destImage = destImage.substr(destImage.find_last_of("\\/")+1);
+	cout << destImage << endl;
+	imwrite(string("edges_"+string(destImage)).c_str(), edges);
 
 	waitKey(0);
 }

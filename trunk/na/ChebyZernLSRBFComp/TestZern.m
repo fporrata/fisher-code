@@ -42,4 +42,4 @@ N = 100;
 
 [p, r] = Zern(rquad, 0, 60);
 
-int = sum(wquad .* r(:, 59, 1)' .* r(:, 59, 1)' .* rquad);
+int = sum(wquad .* r(:, 59, 1)' .* r(:, 59, 1)' .* rquad) * 2 * (58 + 1);

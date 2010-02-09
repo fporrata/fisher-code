@@ -107,11 +107,11 @@ void keyb(unsigned char key, int x, int y) {
 			break;
 		case 'd':
 			/* YOUR CODE HERE */
-			position -= right * 0.2f;
+			position += right * 0.2f;
 			break;
 		case 'a':
 			/* YOUR CODE HERE */
-			position += right * 0.2f;
+			position -= right * 0.2f;
 			break;
 		default:
 			break;
@@ -146,8 +146,13 @@ void motion(int x, int y) {
 	 around the top vector by dx */
 	//cout << "gaze " << gazeDir << endl << endl;
 	gazeDir = prevGazeDir.rotate(topDir, dx);
-	position = position.rotate(topDir, dx);
-	prevGazeDir = gazeDir;
+	//position = position.rotate(topDir, dx);
+	//prevGazeDir = gazeDir;
+	/*XVec3f gaze = gazeDir;
+	gaze.normalize();
+	XVec3f right0 = gazeDir.cross(topDir);
+	right0.normalize();
+	position += right0 * dx;*/
 	//cout << "current gaze " << gazeDir << endl << endl;
 	/* YOUR CODE HERE */
 	/* Implement pitch (nose up and down). Use the previous top direction
@@ -161,11 +166,11 @@ void motion(int x, int y) {
 	float dy = (float)displacement.y()*-0.05f;
 	//cout << "dy " << dy << endl << endl;
 	//cout << "gaze " << gazeDir << endl << endl;
-	gazeDir = prevGazeDir.rotate(right, dy);
+	gazeDir = gazeDir.rotate(right, dy);
 	//cout << "current gaze " << gazeDir << endl << endl;
 	topDir = prevTopDir.rotate(right, dy);
 	//cout << "Position " << position << endl << endl;
-	position = position.rotate(right, dy);
+	//position = position.rotate(right, dy);
 	//cout << "Current position " << position << endl << endl;
 
 	prevGazeDir = gazeDir;

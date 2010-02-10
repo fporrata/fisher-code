@@ -115,6 +115,10 @@ module pipeline (// Inputs
   wire        id_illegal_out;
   wire        id_valid_inst_out;
 
+	wire	[2:0]	id_raw_rega_out;
+	wire	[2:0]	id_raw_regb_out;
+	wire				id_raw_stall;
+
   // Outputs from ID/EX Pipeline Register
   reg  [63:0] id_ex_NPC;
   reg  [31:0] id_ex_IR;
@@ -131,6 +135,9 @@ module pipeline (// Inputs
   reg         id_ex_halt;
   reg         id_ex_illegal;
   reg         id_ex_valid_inst;
+
+ 	reg		[2:0]	id_ex_raw_rega;
+	reg		[2:0]	id_ex_raw_regb;
    
   // Outputs from EX-Stage
   wire [63:0] ex_alu_result_out;
@@ -170,6 +177,12 @@ module pipeline (// Inputs
   wire  [4:0] wb_reg_wr_idx_out;
   wire        wb_reg_wr_en_out;
 
+	`define	NO_RAW			3'h0
+  `define	EX_RAW			3'h1
+	//`define	ARI_RAW_REG			3'h2
+	`define	MEM_RAW			3'h3
+	//`define	MEM_RAW_REGB		3'h4
+
   assign pipeline_completed_insts = {3'b0, mem_wb_valid_inst};
   assign pipeline_error_status = 
     mem_wb_illegal ? `HALTED_ON_ILLEGAL
@@ -200,6 +213,8 @@ module pipeline (// Inputs
                        .ex_mem_take_branch(ex_mem_take_branch),
                        .ex_mem_target_pc(ex_mem_alu_result),
                        .Imem2proc_data(mem2proc_data),
+											 
+											 .id_raw_stall(id_raw_stall),
                        
                        // Outputs
                        .if_NPC_out(if_NPC_out), 
@@ -224,7 +239,7 @@ module pipeline (// Inputs
       if_id_IR         <= `SD `NOOP_INST;
       if_id_valid_inst <= `SD `FALSE;
     end // if (reset)
-    else if (if_id_enable)
+    else if (if_id_enable && ~id_raw_stall)
       begin
         if_id_NPC        <= `SD if_NPC_out;
         if_id_IR         <= `SD if_IR_out;
@@ -246,6 +261,10 @@ module pipeline (// Inputs
                        .wb_reg_wr_en_out   (wb_reg_wr_en_out),
                        .wb_reg_wr_idx_out  (wb_reg_wr_idx_out),
                        .wb_reg_wr_data_out (wb_reg_wr_data_out),
+
+											 .id_ex_IR(id_ex_IR),
+											 .id_ex_dest_reg_idx(id_ex_dest_reg_idx),
+											 .ex_mem_dest_reg_idx(ex_mem_dest_reg_idx),
                        
                        // Outputs
                        .id_ra_value_out(id_rega_out),
@@ -260,7 +279,11 @@ module pipeline (// Inputs
                        .id_uncond_branch_out(id_uncond_branch_out),
                        .id_halt_out(id_halt_out),
                        .id_illegal_out(id_illegal_out),
-                       .id_valid_inst_out(id_valid_inst_out)
+                       .id_valid_inst_out(id_valid_inst_out),
+
+											 .id_raw_rega_out(id_raw_rega_out),
+											 .id_raw_regb_out(id_raw_regb_out),
+											 .id_raw_stall(id_raw_stall)
                       );
 
 
@@ -293,7 +316,7 @@ module pipeline (// Inputs
     end // if (reset)
     else
     begin
-      if (id_ex_enable)
+      if (id_ex_enable && ~id_raw_stall)
       begin
         id_ex_NPC           <= `SD if_id_NPC;
         id_ex_IR            <= `SD if_id_IR;
@@ -309,8 +332,12 @@ module pipeline (// Inputs
         id_ex_uncond_branch <= `SD id_uncond_branch_out;
         id_ex_halt          <= `SD id_halt_out;
         id_ex_illegal       <= `SD id_illegal_out;
-        id_ex_valid_inst    <= `SD id_valid_inst_out;
+				id_ex_valid_inst		<= `SD id_valid_inst_out;
+				id_ex_raw_rega			<= `SD id_raw_rega_out;
+				id_ex_raw_regb			<= `SD id_raw_regb_out;
       end // if
+			else if (id_raw_stall)
+				id_ex_valid_inst		<= `SD 1'b0;
     end // else: !if(reset)
   end // always
 
@@ -359,7 +386,7 @@ module pipeline (// Inputs
       ex_mem_illegal      <= `SD 0;
       ex_mem_valid_inst   <= `SD 0;
       ex_mem_rega         <= `SD 0;
-      ex_mem_alu_result   <= `SD 0;
+      ex_mem_alu_result   <= `SD 0;//http://gwtgallery.appspot.com/about_app?app_id=1115
       ex_mem_take_branch  <= `SD 0;
     end
     else

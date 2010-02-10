@@ -18,6 +18,8 @@ module if_stage(// Inputs
                 ex_mem_take_branch,
                 ex_mem_target_pc,
                 Imem2proc_data,
+
+								id_raw_stall,
                     
                 // Outputs
                 if_NPC_out,        // PC+4 of fetched instruction
@@ -33,6 +35,7 @@ module if_stage(// Inputs
   input         ex_mem_take_branch; // taken-branch signal
   input  [63:0] ex_mem_target_pc;   // target pc: use if take_branch is TRUE
   input  [63:0] Imem2proc_data;     // Data coming back from instruction-memory
+  input			id_raw_stall;	// Whether stall increasing PC due to raw detected by id
 
   output [63:0] proc2Imem_addr;     // Address sent to Instruction memory
   output [63:0] if_NPC_out;         // PC of instruction after fetched (PC+4).
@@ -57,7 +60,8 @@ module if_stage(// Inputs
     // next PC is target_pc if there is a taken branch or
     // the next sequential PC (PC+4) if no branch
     // (halting is handled with the enable PC_enable;
-  assign next_PC = ex_mem_take_branch ? ex_mem_target_pc : PC_plus_4;
+  assign next_PC = ex_mem_take_branch ? ex_mem_target_pc : 
+  								 id_raw_stall ? PC_reg : PC_plus_4;
 
     // The take-branch signal must override stalling (otherwise it may be lost)
   assign PC_enable=if_valid_inst_out | ex_mem_take_branch;
@@ -79,12 +83,12 @@ module if_stage(// Inputs
     // fetch to stall until the previous instruction has completed
     // This must be removed for Project 3
   // synopsys sync_set_reset "reset"
-  always @(posedge clock)
+  /*always @(posedge clock)
   begin
     if (reset)
       if_valid_inst_out <= `SD 1;  // must start with something
     else
       if_valid_inst_out <= `SD mem_wb_valid_inst;
-  end
+  end*/
   
 endmodule  // module if_stage

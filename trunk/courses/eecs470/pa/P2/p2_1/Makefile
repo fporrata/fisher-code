@@ -24,13 +24,13 @@ all:    simv
 #####
 
 TESTBENCH = mult_test.v
-SIMFILES = pipe_mult_4.v mult_stage_16.v
+SIMFILES = pipe_mult_2.v mult_stage_32.v
 SYNFILES = mult.vg /afs/engin.umich.edu/caen/generic/mentor_lib-D.1/public/eecs470/verilog/lec25dscc25.v
 
-mult.vg:        pipe_mult_4.v mult_stage_16.vg mult.tcl
+mult.vg:        pipe_mult_2.v mult_stage_32.vg mult.tcl
 	dc_shell-t -f ./mult.tcl | tee mult_synth.out
 
-mult_stage_16.vg:        mult_stage_16.v mult_stage.tcl
+mult_stage_32.vg:        mult_stage_32.v mult_stage.tcl
 	dc_shell-t -f ./mult_stage.tcl | tee mult_stage_synth.out
 
 #####

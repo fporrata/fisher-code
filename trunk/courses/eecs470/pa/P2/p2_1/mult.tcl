@@ -22,7 +22,7 @@ suppress_message {"VER-130"}
 #/***********************************************************/
 read_file -f ddc [list "mult_stage_16.ddc"]
 set_dont_touch mult_stage_16
-read_file -f verilog [list "pipe_mult_4.v"]
+read_file -f verilog [list "pipe_mult_2.v"]
 set design_name mult
 set clock_name clock
 set reset_name reset

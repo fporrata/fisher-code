@@ -206,6 +206,10 @@ module id_stage(
               wb_reg_wr_idx_out,
               wb_reg_wr_data_out,
 
+							id_ex_IR,
+			  			id_ex_dest_reg_idx,
+			 				ex_mem_dest_reg_idx,
+
               // Outputs
               id_ra_value_out,
               id_rb_value_out,
@@ -219,7 +223,11 @@ module id_stage(
               id_uncond_branch_out,
               id_halt_out,
               id_illegal_out,
-              id_valid_inst_out
+              id_valid_inst_out,
+
+							id_raw_rega_out,
+							id_raw_regb_out,
+							id_raw_stall
               );
 
 
@@ -230,6 +238,10 @@ module id_stage(
   input   [4:0] wb_reg_wr_idx_out;    // Reg write index from WB Stage
   input  [63:0] wb_reg_wr_data_out;   // Reg write data from WB Stage
   input         if_id_valid_inst;
+
+	input	 [31:0]	id_ex_IR;
+  input		[4:0]	id_ex_dest_reg_idx;		// EX stage dest register
+	input		[4:0]	ex_mem_dest_reg_idx;	// MEM stage dest register
 
   output [63:0] id_ra_value_out;      // reg A value
   output [63:0] id_rb_value_out;      // reg B value
@@ -247,6 +259,10 @@ module id_stage(
   output        id_illegal_out;
   output        id_valid_inst_out;    // is inst a valid instruction to be 
                                       // counted for CPI calculations?
+
+	output				id_raw_stall;			// Whether stall the pipeline due to raw hazard
+	output	[2:0]	id_raw_rega_out;			// RAW hazard
+	output	[2:0]	id_raw_regb_out;
    
   wire    [1:0] dest_reg_select;
   reg     [4:0] id_dest_reg_idx_out;     // not state: behavioral mux output
@@ -255,6 +271,12 @@ module id_stage(
   wire    [4:0] ra_idx = if_id_IR[25:21];   // inst operand A register index
   wire    [4:0] rb_idx = if_id_IR[20:16];   // inst operand B register index
   wire    [4:0] rc_idx = if_id_IR[4:0];     // inst operand C register index
+	
+	wire					id_ex_IR_is_lw;
+
+	reg						id_raw_stall;
+	reg			[2:0]	id_raw_rega_out;
+	reg			[2:0]	id_raw_regb_out;
 
     // Instantiate the register file used by this pipeline
   regfile regf_0 (.rda_idx(ra_idx),
@@ -287,6 +309,46 @@ module id_stage(
                      .illegal(id_illegal_out),
                      .valid_inst(id_valid_inst_out)
                     );
+
+	// Detect whether there is a RAW hazard by comparing to the dest reg of 
+	// the next two stages and whether a stall need to be issued
+
+	// Distinguish lw and other ins
+	// Notice ZERO_REG
+
+	assign id_ex_IR_is_lw = (id_ex_IR[31:26] == `LDA_INST || id_ex_IR[31:26] == `LDQ_INST) ? 1 : 0;
+
+	always @*
+	begin
+		id_raw_stall = 1'b0;
+		id_raw_rega_out = `NO_RAW;
+		id_raw_regb_out = `NO_RAW;
+		if (id_valid_inst_out) begin
+		if (id_opa_select_out == `ALU_OPA_IS_REGA && ra_idx !== `ZERO_REG) begin
+			case (ra_idx)
+				id_ex_dest_reg_idx: begin
+					if (id_ex_IR_is_lw)
+						id_raw_stall = 1'b1;
+					else
+						id_raw_rega_out = `EX_RAW;
+				end
+				ex_mem_dest_reg_idx: id_raw_rega_out = `EX_RAW;
+			endcase
+		end
+	
+		if (id_opb_select_out == `ALU_OPB_IS_REGB && rb_idx !== `ZERO_REG) begin
+			case (rb_idx)
+				id_ex_dest_reg_idx: begin
+					if (id_ex_IR_is_lw)
+						id_raw_stall = 1'b1;
+					else
+						id_raw_regb_out = `EX_RAW;
+				end
+				ex_mem_dest_reg_idx: id_raw_regb_out = `EX_RAW;
+			endcase
+		end
+		end
+	end
 
      // mux to generate dest_reg_idx based on
      // the dest_reg_select output from decoder

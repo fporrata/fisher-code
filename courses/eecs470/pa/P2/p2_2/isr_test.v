@@ -108,7 +108,7 @@ begin
 	reset = 1;
 
 
-	while (counte < `NUM_TESTS)
+	while (counte < 1) //`NUM_TESTS)
 	begin
 		$display("Loop %b", counte);
 		value = test_values[(counte+1)*64-1 -:64]; //(counte-1)*64];
@@ -124,7 +124,7 @@ begin
 		counte = next_counte;
 	end
 
-	while (counte < 1000)
+	while (counte < 1)
 	begin
 		$display("Loop %b", counte);
 		value = {$random, $random};

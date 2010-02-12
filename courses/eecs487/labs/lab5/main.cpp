@@ -18,7 +18,7 @@ extern "C" {
 }
 
 #include "shaders.h"
-
+#include "timer.h"
 using namespace std;
 
 // app initialization
@@ -29,6 +29,7 @@ void disp(void);
 void reshape(int w, int h);
 void keyb(unsigned char key, int x, int y);
 void update(void);
+void updateScreen(void);
 
 
 /* Handle to the GLUT window */
@@ -39,6 +40,9 @@ void print_help(void);
 
 /* defined externally */
 void initDrawItems(void);
+
+Timer timer;
+GLint time_id;
 
 
 // Global variables
@@ -78,11 +82,23 @@ int main(int argc, char *argv[])
     glutDisplayFunc(disp);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyb);
+
+	glutIdleFunc(updateScreen);
     
     /* Start the GLUT event loop */
     glutMainLoop();
     
     return 0;
+}
+
+void updateScreen()
+{
+	//cout << "Update is called\n";
+	//Timer curtimer = timer;
+	//curtimer.stop();
+	//cout << curtimer.secs() << endl;
+	glUniform1f(time_id, timer.secs());
+	glutPostRedisplay();
 }
 
 
@@ -125,6 +141,8 @@ void init(char *vpFile, char *fpFile)
   
     // Load vertex and fragment programs - calls PA2 code
     assert(InitShaders(vpFile, fpFile, &spo));
+	time_id = glGetUniformLocation(spo, "time");
+	timer.start();
 }
 
 
@@ -172,8 +190,11 @@ void disp(void)
   /* Draw the teapot */
     glCallList(drawID);
     
+	glUseProgramObjectARB(0);
   /* Draw the canonical axes */
     drawCanonicalAxes();
+	if (usingShaders)
+		glUseProgramObjectARB(spo);
     
   /* Force OpenGL to start drawing */
     glutSwapBuffers();

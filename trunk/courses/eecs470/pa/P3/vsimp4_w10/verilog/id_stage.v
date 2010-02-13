@@ -333,12 +333,10 @@ module id_stage(
 								ra_idx != `ZERO_REG) begin
 			case (ra_idx)
 				id_ex_dest_reg_idx: begin
-					if (~id_ex_wr_mem) begin
 						if (id_ex_IR_is_lw)
 							id_raw_stall = 1'b1;
 						else
 							id_raw_rega_out = `EX_RAW;
-					end
 				end
 				ex_mem_dest_reg_idx: begin
 						id_raw_rega_out = `MEM_RAW;
@@ -349,15 +347,12 @@ module id_stage(
 		if (id_opb_select_out == `ALU_OPB_IS_REGB && rb_idx != `ZERO_REG) begin
 			case (rb_idx)
 				id_ex_dest_reg_idx: begin
-					if(~id_ex_wr_mem) begin
 						if (id_ex_IR_is_lw)
 							id_raw_stall = 1'b1;
 						else
 							id_raw_regb_out = `EX_RAW;
-					end
 				end
 				ex_mem_dest_reg_idx: begin
-					if (~ex_mem_wr_mem) 
 						id_raw_regb_out = `MEM_RAW;
 				end
 			endcase

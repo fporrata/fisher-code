@@ -485,10 +485,8 @@ module pipeline (// Inputs
         mem_wb_halt         <= `SD ex_mem_halt;
         mem_wb_illegal      <= `SD ex_mem_illegal;
         mem_wb_valid_inst   <= `SD ex_mem_valid_inst;
-				if (ex_mem_IR[31:26] == `STQ_INST)
-					mem_wb_dest_reg_idx <= `SD `ZERO_REG;
-				else
-					mem_wb_dest_reg_idx <= `SD ex_mem_dest_reg_idx;
+				mem_wb_dest_reg_idx <= `SD `ZERO_REG;
+				mem_wb_dest_reg_idx <= `SD ex_mem_dest_reg_idx;
         mem_wb_take_branch  <= `SD ex_mem_take_branch;
         // these are results of MEM stage
         mem_wb_result       <= `SD mem_result_out;

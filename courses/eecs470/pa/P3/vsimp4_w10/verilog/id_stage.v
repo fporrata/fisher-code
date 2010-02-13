@@ -209,6 +209,8 @@ module id_stage(
 							id_ex_IR,
 			  			id_ex_dest_reg_idx,
 			 				ex_mem_dest_reg_idx,
+							id_ex_wr_mem,
+							ex_mem_wr_mem,
 
               // Outputs
               id_ra_value_out,
@@ -242,6 +244,8 @@ module id_stage(
 	input	 [31:0]	id_ex_IR;
   input		[4:0]	id_ex_dest_reg_idx;		// EX stage dest register
 	input		[4:0]	ex_mem_dest_reg_idx;	// MEM stage dest register
+	input					id_ex_wr_mem;
+	input					ex_mem_wr_mem;
 
   output [63:0] id_ra_value_out;      // reg A value
   output [63:0] id_rb_value_out;      // reg B value
@@ -316,7 +320,7 @@ module id_stage(
 	// Distinguish lw and other ins
 	// Notice ZERO_REG
 
-	assign id_ex_IR_is_lw = (id_ex_IR[31:26] == `LDA_INST || id_ex_IR[31:26] == `LDQ_INST) ? 1 : 0;
+	assign id_ex_IR_is_lw = (id_ex_IR[31:26] == `LDQ_INST) ? 1 : 0;
 
 	always @*
 	begin
@@ -324,27 +328,38 @@ module id_stage(
 		id_raw_rega_out = `NO_RAW;
 		id_raw_regb_out = `NO_RAW;
 		if (id_valid_inst_out) begin
-		if (id_opa_select_out == `ALU_OPA_IS_REGA && ra_idx !== `ZERO_REG) begin
+		if ((id_cond_branch_out || id_opa_select_out == `ALU_OPA_IS_REGA || 
+								dest_reg_select == `DEST_IS_REGA || if_id_IR[31:26] == `STQ_INST) &&
+								ra_idx != `ZERO_REG) begin
 			case (ra_idx)
 				id_ex_dest_reg_idx: begin
-					if (id_ex_IR_is_lw)
-						id_raw_stall = 1'b1;
-					else
-						id_raw_rega_out = `EX_RAW;
+					if (~id_ex_wr_mem) begin
+						if (id_ex_IR_is_lw)
+							id_raw_stall = 1'b1;
+						else
+							id_raw_rega_out = `EX_RAW;
+					end
 				end
-				ex_mem_dest_reg_idx: id_raw_rega_out = `EX_RAW;
+				ex_mem_dest_reg_idx: begin
+						id_raw_rega_out = `MEM_RAW;
+					end
 			endcase
 		end
 	
-		if (id_opb_select_out == `ALU_OPB_IS_REGB && rb_idx !== `ZERO_REG) begin
+		if (id_opb_select_out == `ALU_OPB_IS_REGB && rb_idx != `ZERO_REG) begin
 			case (rb_idx)
 				id_ex_dest_reg_idx: begin
-					if (id_ex_IR_is_lw)
-						id_raw_stall = 1'b1;
-					else
-						id_raw_regb_out = `EX_RAW;
+					if(~id_ex_wr_mem) begin
+						if (id_ex_IR_is_lw)
+							id_raw_stall = 1'b1;
+						else
+							id_raw_regb_out = `EX_RAW;
+					end
 				end
-				ex_mem_dest_reg_idx: id_raw_regb_out = `EX_RAW;
+				ex_mem_dest_reg_idx: begin
+					if (~ex_mem_wr_mem) 
+						id_raw_regb_out = `MEM_RAW;
+				end
 			endcase
 		end
 		end

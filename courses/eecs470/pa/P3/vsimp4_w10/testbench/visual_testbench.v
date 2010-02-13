@@ -142,7 +142,7 @@ module testbench();
     // *Note that after this, all stdout output goes to visual debugger*
     // each argument is number of registers/signals for the group
     // (IF, IF/ID, ID, ID/EX, EX, EX/MEM, MEM, MEM/WB, WB, Misc)
-    initcurses(6,4,13,16,4,12,5,9,3,2);
+    initcurses(6,4,20,18,7,12,5,9,3,2);
 
     // Pulse the reset signal
     reset = 1'b1;
@@ -228,6 +228,7 @@ module testbench();
     $display("gNPC 16:%h",          pipeline_0.if_id_NPC);
     $display("gIR 8:%h",            pipeline_0.if_id_IR);
     $display("gvalid 1:%h",         pipeline_0.if_id_valid_inst);
+		
 
     // ID signals (13) - prefix 'd'
     $display("drega 16:%h",         pipeline_0.id_rega_out);
@@ -243,6 +244,17 @@ module testbench();
     $display("dhalt 1:%h",          pipeline_0.id_halt_out);
     $display("dillegal 1:%h",       pipeline_0.id_illegal_out);
     $display("dvalid 1:%h",         pipeline_0.id_valid_inst_out);
+
+		$display("drega_idx	5:%h", 			pipeline_0.id_stage_0.ra_idx);
+		$display("dregb_idx 5:%h",			pipeline_0.id_stage_0.rb_idx);
+		//$display("dopa_select 2:%h",		pipeline_0.id_stage_0.id_opa_select_out);
+		//$display("dopb_select	2:%h",		pipeline_0.id_stage_0.id_opb_select_out);
+		$display("draw_stall 1:%h",			pipeline_0.id_raw_stall);
+		$display("draw_rega 3:%h",			pipeline_0.id_raw_rega_out);
+		$display("draw_regb 3:%h", 			pipeline_0.id_raw_regb_out);
+		$display("dex_mem_dest_reg_idx 5:%h", pipeline_0.id_stage_0.ex_mem_dest_reg_idx);
+		$display("ddest_reg_select 2:%h", pipeline_0.id_stage_0.dest_reg_select);
+
 
     // ID/EX signals (16) - prefix 'h'
     $display("henable 1:%h",        pipeline_0.id_ex_enable);
@@ -262,11 +274,18 @@ module testbench();
     $display("hillegal 1:%h",       pipeline_0.id_ex_illegal);
     $display("hvalid 1:%h",         pipeline_0.id_ex_valid_inst);
 
+		$display("hraw_rega 3:%h",			pipeline_0.id_ex_raw_rega);
+		$display("hraw_regb 3:%h", 			pipeline_0.id_ex_raw_regb);
+
     // EX signals (4) - prefix 'e'
     $display("eopa_mux 16:%h",      pipeline_0.ex_stage_0.opa_mux_out);
     $display("eopb_mux 16:%h",      pipeline_0.ex_stage_0.opb_mux_out);
     $display("ealu_result 16:%h",   pipeline_0.ex_alu_result_out);
     $display("etake_branch 1:%h",   pipeline_0.ex_take_branch_out);
+
+		$display("ebrcond_result 1:%h",	pipeline_0.ex_stage_0.brcond_result);
+		$display("ereal_rega 64:%h", pipeline_0.id_ex_real_rega);
+		$display("ereal_regb 64:%h", pipeline_0.id_ex_real_regb);
 
     // EX/MEM signals (12) - prefix 'i'
     $display("ienable 1:%h",        pipeline_0.ex_mem_enable);

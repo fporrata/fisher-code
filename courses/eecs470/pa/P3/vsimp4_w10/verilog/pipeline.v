@@ -140,6 +140,9 @@ module pipeline (// Inputs
 	reg		[2:0]	id_ex_raw_regb;
    
   // Outputs from EX-Stage
+	reg	 [63:0]	id_ex_real_rega;
+	reg	 [63:0] id_ex_real_regb;
+
   wire [63:0] ex_alu_result_out;
   wire        ex_take_branch_out;
 
@@ -197,9 +200,9 @@ module pipeline (// Inputs
   assign pipeline_commit_NPC = mem_wb_NPC;
 
   assign proc2mem_command =
-           (proc2Dmem_command==`BUS_NONE)?`BUS_LOAD:proc2Dmem_command;
+           (proc2Dmem_command==`BUS_NONE || ~ex_mem_valid_inst)?`BUS_LOAD:proc2Dmem_command;
   assign proc2mem_addr =
-           (proc2Dmem_command==`BUS_NONE)?proc2Imem_addr:proc2Dmem_addr;
+           (proc2Dmem_command==`BUS_NONE || ~ex_mem_valid_inst)?proc2Imem_addr:proc2Dmem_addr;
 
   //////////////////////////////////////////////////
   //                                              //
@@ -215,6 +218,9 @@ module pipeline (// Inputs
                        .Imem2proc_data(mem2proc_data),
 											 
 											 .id_raw_stall(id_raw_stall),
+											 .ex_mem_rd_mem(ex_mem_rd_mem),
+											 .ex_mem_wr_mem(ex_mem_wr_mem),
+											 .ex_mem_valid_inst(ex_mem_valid_inst),
                        
                        // Outputs
                        .if_NPC_out(if_NPC_out), 
@@ -233,7 +239,7 @@ module pipeline (// Inputs
   // synopsys sync_set_reset "reset"
   always @(posedge clock)
   begin
-    if(reset)
+    if(reset || ex_mem_take_branch)
     begin
       if_id_NPC        <= `SD 0;
       if_id_IR         <= `SD `NOOP_INST;
@@ -265,6 +271,8 @@ module pipeline (// Inputs
 											 .id_ex_IR(id_ex_IR),
 											 .id_ex_dest_reg_idx(id_ex_dest_reg_idx),
 											 .ex_mem_dest_reg_idx(ex_mem_dest_reg_idx),
+											 .id_ex_wr_mem(id_ex_wr_mem),
+											 .ex_mem_wr_mem(ex_mem_wr_mem),
                        
                        // Outputs
                        .id_ra_value_out(id_rega_out),
@@ -296,7 +304,7 @@ module pipeline (// Inputs
   // synopsys sync_set_reset "reset"
   always @(posedge clock)
   begin
-    if (reset)
+    if (reset || id_raw_stall || ex_mem_take_branch)
     begin
       id_ex_NPC           <= `SD 0;
       id_ex_IR            <= `SD `NOOP_INST;
@@ -316,7 +324,7 @@ module pipeline (// Inputs
     end // if (reset)
     else
     begin
-      if (id_ex_enable && ~id_raw_stall)
+      if (id_ex_enable)
       begin
         id_ex_NPC           <= `SD if_id_NPC;
         id_ex_IR            <= `SD if_id_IR;
@@ -336,8 +344,6 @@ module pipeline (// Inputs
 				id_ex_raw_rega			<= `SD id_raw_rega_out;
 				id_ex_raw_regb			<= `SD id_raw_regb_out;
       end // if
-			else if (id_raw_stall)
-				id_ex_valid_inst		<= `SD 1'b0;
     end // else: !if(reset)
   end // always
 
@@ -347,13 +353,29 @@ module pipeline (// Inputs
   //                  EX-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
+
+	always @*
+	begin
+		case (id_ex_raw_rega)
+			`NO_RAW: id_ex_real_rega = id_ex_rega;
+			`EX_RAW: id_ex_real_rega = ex_mem_alu_result;
+			`MEM_RAW: id_ex_real_rega = mem_wb_result;
+		endcase
+
+		case (id_ex_raw_regb)
+			`NO_RAW: id_ex_real_regb = id_ex_regb;
+			`EX_RAW: id_ex_real_regb = ex_mem_alu_result;
+			`MEM_RAW: id_ex_real_regb = mem_wb_result;
+		endcase
+	end
+
   ex_stage ex_stage_0 (// Inputs
                        .clock(clock),
                        .reset(reset),
                        .id_ex_NPC(id_ex_NPC), 
                        .id_ex_IR(id_ex_IR),
-                       .id_ex_rega(id_ex_rega),
-                       .id_ex_regb(id_ex_regb),
+                       .id_ex_rega(id_ex_real_rega),
+                       .id_ex_regb(id_ex_real_regb),
                        .id_ex_opa_select(id_ex_opa_select),
                        .id_ex_opb_select(id_ex_opb_select),
                        .id_ex_alu_func(id_ex_alu_func),
@@ -375,7 +397,7 @@ module pipeline (// Inputs
   // synopsys sync_set_reset "reset"
   always @(posedge clock)
   begin
-    if (reset)
+    if (reset || ex_mem_take_branch) // || (id_ex_cond_branch && ex_take_branch_out))
     begin
       ex_mem_NPC          <= `SD 0;
       ex_mem_IR           <= `SD `NOOP_INST;
@@ -402,7 +424,7 @@ module pipeline (// Inputs
         ex_mem_halt         <= `SD id_ex_halt;
         ex_mem_illegal      <= `SD id_ex_illegal;
         ex_mem_valid_inst   <= `SD id_ex_valid_inst;
-        ex_mem_rega         <= `SD id_ex_rega;
+        ex_mem_rega         <= `SD id_ex_real_rega;
         // these are results of EX stage
         ex_mem_alu_result   <= `SD ex_alu_result_out;
         ex_mem_take_branch  <= `SD ex_take_branch_out;
@@ -442,7 +464,7 @@ module pipeline (// Inputs
   // synopsys sync_set_reset "reset"
   always @(posedge clock)
   begin
-    if (reset)
+    if (reset || ~ex_mem_valid_inst)
     begin
       mem_wb_NPC          <= `SD 0;
       mem_wb_IR           <= `SD `NOOP_INST;
@@ -463,7 +485,10 @@ module pipeline (// Inputs
         mem_wb_halt         <= `SD ex_mem_halt;
         mem_wb_illegal      <= `SD ex_mem_illegal;
         mem_wb_valid_inst   <= `SD ex_mem_valid_inst;
-        mem_wb_dest_reg_idx <= `SD ex_mem_dest_reg_idx;
+				if (ex_mem_IR[31:26] == `STQ_INST)
+					mem_wb_dest_reg_idx <= `SD `ZERO_REG;
+				else
+					mem_wb_dest_reg_idx <= `SD ex_mem_dest_reg_idx;
         mem_wb_take_branch  <= `SD ex_mem_take_branch;
         // these are results of MEM stage
         mem_wb_result       <= `SD mem_result_out;

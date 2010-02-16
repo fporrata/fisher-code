@@ -4,6 +4,7 @@
 
 #include "EdgeDector.h"
 #include "highgui.h"
+#include "cv.h"
 
 using namespace std;
 using namespace cv;
@@ -25,7 +26,7 @@ int main (int argc, char * argv[])
 	string destImage = argv[1];
 	destImage = "results/edges_" +
 		destImage.substr(destImage.find_last_of("\\/")+1);
-	//cout << destImage << endl;
+	cout << destImage << endl;
 	imwrite(destImage, edges);
 
 	waitKey(0);

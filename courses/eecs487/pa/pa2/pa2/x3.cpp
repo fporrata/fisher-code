@@ -214,6 +214,37 @@ void X3Cylinder::Render() const {
   // YOUR CODE HERE: Modify this function to render a cylinder.
   // Make sure to use top_, side_, and bottom_ flags and to compute 
   // and send the normals properly.
+	const int N = 20;
+	const float step = 2.0f * M_PI / N;
+	if (side_) {
+		glBegin(GL_QUAD_STRIP);
+		for (int k = 0; k < N + 1; ++k) {
+			glNormal3f(cos(k*step), 0, sin(k*step));
+			glVertex3f(radius_ * cos(k*step), height_ * 0.5, radius_ * sin(k*step));
+			glVertex3f(radius_ * cos(k*step), -height_*0.5, radius_*sin(k*step));
+		}
+		glEnd();
+	}
+
+	if (bottom_) {
+		glBegin(GL_TRIANGLE_FAN);
+		glNormal3f(0.0f, -1.0f, 0.0f);
+		glVertex3f(0.0f, -0.5f*height_, 0.0f);
+		for (int k = 0; k < N+1; ++k) {
+			glVertex3f(radius_*cos(k*step), -0.5f*height_, radius_*sin(k*step));
+		}
+		glEnd();
+	}
+
+	if (top_) {
+		glBegin(GL_TRIANGLE_FAN);
+		glNormal3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(0.0f, 0.5f*height_, 0.0f);
+		for (int k = 0; k < N+1; ++k) {
+			glVertex3f(radius_*cos(k*step), 0.5f*height_, radius_*sin(k*step));
+		}
+		glEnd();
+	}
 }
 
 void X3GroupingNode::Print(std::ostream& ost, int offset) const {

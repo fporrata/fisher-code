@@ -138,9 +138,22 @@ public:
     phi_ = phi;
   }
 
+  float psi() const {
+	  return psi_;
+  }
+
+  void set_psi(float psi) {
+	  psi_ = psi;
+  }
+
+  void set_position(XVec3f position) {
+	  position_ = position;
+  }
+
 private:
   XVec3f position_;
   float phi_;
+  float psi_;
 };
 
 

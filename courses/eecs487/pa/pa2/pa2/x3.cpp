@@ -218,10 +218,10 @@ void X3Cylinder::Render() const {
 	const float step = 2.0f * M_PI / N;
 	if (side_) {
 		glBegin(GL_QUAD_STRIP);
-		for (int k = 0; k < N + 1; ++k) {
+		for (int k = 0; k < N+1; ++k) {
 			glNormal3f(cos(k*step), 0, sin(k*step));
-			glVertex3f(radius_ * cos(k*step), height_ * 0.5, radius_ * sin(k*step));
 			glVertex3f(radius_ * cos(k*step), -height_*0.5, radius_*sin(k*step));
+			glVertex3f(radius_ * cos(k*step), height_ * 0.5, radius_ * sin(k*step));
 		}
 		glEnd();
 	}
@@ -240,7 +240,7 @@ void X3Cylinder::Render() const {
 		glBegin(GL_TRIANGLE_FAN);
 		glNormal3f(0.0f, 1.0f, 0.0f);
 		glVertex3f(0.0f, 0.5f*height_, 0.0f);
-		for (int k = 0; k < N+1; ++k) {
+		for (int k = N; k > -1; --k) {
 			glVertex3f(radius_*cos(k*step), 0.5f*height_, radius_*sin(k*step));
 		}
 		glEnd();
@@ -311,11 +311,40 @@ X3IndexedFaceSet::X3IndexedFaceSet(const char** atts)
   }
 }
 
+XVec3f polyNormal(const XVec3f & p1, const XVec3f & p2, const XVec3f & p3)
+{
+	XVec3f normal = (p2 - p1).cross(p3 - p2);
+	normal.normalize();
+	return normal;
+}
+	
+	
 void X3IndexedFaceSet::Render() const {
   // YOUR CODE HERE: Modify this function to render sets of triangles 
   // and sets of quads.
   if(!coordinate_)
     return;
+
+  glBegin(GL_TRIANGLES);
+  for (std::vector<XVec3i>::const_iterator it = triangles_.begin();
+			it != triangles_.end(); it++) {
+	  for (int i = 0; i < 3; i++) {
+		  glNormal3fv(normals_[(*it)(i)]);
+		  glVertex3fv(coordinate_->point((*it)(i)));
+	  }
+  }
+  glEnd();
+  glBegin(GL_QUADS);
+  for (std::vector<XVec4i>::const_iterator it = quads_.begin();
+		  it != quads_.end(); it++) {
+	  for (int i = 0; i < 4; i++) {
+		  glNormal3fv(normals_[(*it)(i)]);
+		  glVertex3fv(coordinate_->point((*it)(i)));
+	  }
+  }
+  glEnd();
+	
+
 }
 
 void X3IndexedFaceSet::Add(X3NodeType type, X3Node* node) {
@@ -327,6 +356,32 @@ void X3IndexedFaceSet::Add(X3NodeType type, X3Node* node) {
     // YOUR CODE HERE: Modify the code below to accumulate normals for every vertex
     // from every triangle and quad it is a part of. Go through every triangle and every quad 
     // accumulating normals for their vertices, and then normalize the normal vectors.
+
+	//cout << "Number of coordinates: " << coordinate_->size() << endl;
+	//cout << "Number of coord indices: " << coord_index_.size() << endl;
+	XVec3f normal;
+	for (std::vector<XVec3i>::iterator it = triangles_.begin();
+			it != triangles_.end(); it++) {
+		normal = polyNormal(coordinate_->point((*it)(0)),
+								   coordinate_->point((*it)(1)),
+								   coordinate_->point((*it)(2)));
+		for (int i = 0; i < 3; i++)
+			normals_[(*it)(i)] += normal;
+	}
+
+	for (std::vector<XVec4i>::iterator it = quads_.begin();
+			it != quads_.end(); it++) {
+		normal = polyNormal(coordinate_->point((*it)(0)),
+								   coordinate_->point((*it)(1)),
+								   coordinate_->point((*it)(2)));
+		for (int i = 0; i < 4; i++)
+			normals_[(*it)(i)] += normal;
+	}
+
+	for (std::vector<XVec3f>::iterator it = normals_.begin();
+			it != normals_.end(); it++) {
+		it->normalize();
+	}
 
   } else {
     X3Node::Add(type, node);
@@ -404,6 +459,11 @@ void X3Material::Print(std::ostream& ost, int offset) const {
 void X3Material::Render() const {
   // YOUR CODE HERE: Modify this function to properly 
   // setup OpenGL material properties.
+	glMaterialfv(GL_FRONT, GL_AMBIENT, &ambient_intensity_);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_color_);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emissive_color_);
+	glMaterialfv(GL_FRONT, GL_SHININESS, &shininess_);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular_color_);
 }
 
 X3PointLight::X3PointLight(const char** atts) 
@@ -431,6 +491,10 @@ void X3PointLight::SetupLights(int* light_count) const {
   // YOUR CODE HERE: Modify this function to properly 
   // setup point light properties as described in section 17.2 of X3D specs.
   // You need to be setting up light with id GL_LIGHT0 + *light_count
+	GLenum light = GL_LIGHT0 + *light_count;
+	glLightf(light, GL_AMBIENT, X3LightNode::ambient_intensity());
+	glLightfv(light, GL_POSITION, location_);
+
 
   // Keep this call at the end to do proper light counting.
   X3LightNode::SetupLights(light_count);
@@ -525,25 +589,42 @@ X3Transform::X3Transform(const char** atts)
       sscanf(*ref, "%f %f %f", &scale_(0), &scale_(1), &scale_(2));
     } else if(strcmp(name, "center")==0) {
       sscanf(*ref, "%f %f %f", &center_(0), &center_(1), &center_(2));
-    } 
-
+    }
   }
 }
 
 void X3Transform::Render() const {
   // YOUR CODE HERE: Modify this function to properly push and pop the state
   // and to setup the transforms for rendering its children.
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glTranslatef(translation_(0), translation_(1), translation_(2));
+	glTranslatef(center_(0), center_(1), center_(2));
+	glRotatef(rotation_.angle_rad, rotation_.axis(0), rotation_.axis(1), rotation_.axis(2));
+	glScalef(scale_(0), scale_(1), scale_(2));
+	glTranslatef(-center_(0), -center_(1), -center_(2));
+	X3GroupingNode::Render();
+	glPopMatrix();
 }
 
 void X3Transform::SetupLights(int* light_count) const {
   // YOUR CODE HERE: Modify this function to properly setup
   // lights at their transformed locations.
   // This function should be very similar to the Render function.
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glTranslatef(translation_(0), translation_(1), translation_(2));
+	glTranslatef(center_(0), center_(1), center_(2));
+	glRotatef(rotation_.angle_rad, rotation_.axis(0), rotation_.axis(1), rotation_.axis(2));
+	glScalef(scale_(0), scale_(1), scale_(2));
+	glTranslatef(-center_(0), -center_(1), -center_(2));
+	X3GroupingNode::SetupLights(light_count);
+	glPopMatrix();
 }
 
 X3Viewpoint::X3Viewpoint(const char** atts) 
   : position_(0.0f, 0.0f, 10.0f),
-    phi_(0.0f)
+    phi_(0.0f), psi_(0.0f)
 {
   if(atts==0)
     return;
@@ -571,4 +652,5 @@ void X3Viewpoint::Render() const {
   gluLookAt(position_(0), position_(1), position_(2), 0.0f, 0.0f, 0.0f, 
     0.0f, 1.0f, 0.0f);
   glRotatef(phi_, 0.0f, 1.0f, 0.0f);
+  glRotatef(psi_, 1.0f, 0.0f, 0.0f);
 }

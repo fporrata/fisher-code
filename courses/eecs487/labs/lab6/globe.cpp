@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include "ltga.h"
+#include "xvec.h"
 
 extern "C" {
 #ifdef __APPLE__
@@ -14,6 +15,7 @@ extern "C" {
 
 using namespace std;
 
+#define PI 3.14159265
 
 bool init(const char *const texture_image_filename);
 void disp(void);
@@ -86,7 +88,31 @@ bool init_lights(void)
 	return true;
 }
 
+void loadTex(const string & imageName, GLuint texName)
+{
+	LTGA ltga(imageName);
+	GLenum format = GL_RGB;
+	switch (ltga.GetImageType()) {
+		case itRGB: format = GL_RGB; break;
+		case itRGBA: format = GL_RGBA; break;
+		case itGreyscale: format = GL_LUMINANCE; break;
+		case itUndefined:
+						  cerr << "Unknow image format\n";
+						  break;
+	}
 
+	//Set the texture
+	glBindTexture(GL_TEXTURE_2D, texName);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, ltga.GetImageWidth(),
+			ltga.GetImageHeight(), 0, format, GL_UNSIGNED_BYTE,
+			ltga.GetPixels());
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+}
 
 GLuint sphere;
 GLUquadricObj *quadratic;
@@ -104,31 +130,18 @@ void loadEnvImages(void)
 {
 	glGenTextures(6, envTexNames);
 	for (int i = 0; i < 6; i++) {
-		//Load the image
-		LTGA ltga(imgDir+envImageNames[i]);
-		GLenum format = GL_RGB;
-		switch (ltga.GetImageType()) {
-			case itRGB: format = GL_RGB; break;
-			case itRGBA: format = GL_RGBA; break;
-			case itGreyscale: format = GL_LUMINANCE; break;
-			case itUndefined:
-							  cerr << "Unknow image format\n";
-							  break;
-		}
-
-		//Set the texture
-		glBindTexture(GL_TEXTURE_2D, envTexNames[i]);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, ltga.GetImageWidth(),
-				ltga.GetImageHeight(), 0, format, GL_BYTE,
-				ltga.GetPixels());
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+		loadTex(imgDir+envImageNames[i], envTexNames[i]);
 	}
 }
 
-
+GLuint globeTexName;
+const char * globeImageName = "images/world-map-country-names.tga";
+void loadGlobeImage()
+{
+	glGenTextures(1, &globeTexName);
+	loadTex(globeImageName, globeTexName);
+}
+	
 bool init(const char *const texture_image_filename)
 {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -136,7 +149,6 @@ bool init(const char *const texture_image_filename)
 	glEnable(GL_DEPTH_TEST);
 	// TODO: initialize texture and texture parameters.
 	loadEnvImages();
-	glEnable(GL_TEXTURE_2D);						// Enable Texture Mapping
 	
 	// TODO: Create sphere-drawing display list. Map texture coordinates as you create the sphere.
 
@@ -144,13 +156,51 @@ bool init(const char *const texture_image_filename)
 	gluQuadricNormals(quadratic, GLU_SMOOTH);	// Create Smooth Normals 
 	gluQuadricTexture(quadratic, GL_TRUE);		// Create Texture Coords
 
+	// Set up the shpere:
+	GLint slices = 32;
+	GLint stacks = 32;
+	GLuint radius = 1;
+	GLfloat dTheta = 2 * PI / slices;
+	GLfloat dPhi = PI / stacks;
+
+	loadGlobeImage();
+
+	GLfloat ds = 1.0f / slices;
+	GLfloat dt = 1.0f / stacks;
+
 	sphere = glGenLists(1);
 	glNewList(sphere, GL_COMPILE);
+	//glColor3f(1.0f, 1.0f, 1.0f);
 
+	//gluSphere(quadratic, radius, 32, 32);
+	glBindTexture(GL_TEXTURE_2D, globeTexName);
+	glBegin(GL_QUADS);
+	for (int i = 0; i < slices; i++) {
+		GLfloat theta0 = dTheta * i;
+		GLfloat theta1 = theta0 + dTheta;
+		GLfloat s0 = ds * i;
+		GLfloat s1 = s0 + ds;
+		for (int j = 0; j < stacks; j++) {
+			GLfloat phi0 = dPhi * j - PI / 2;
+			GLfloat phi1 = phi0 + dPhi;
+			GLfloat t0 = dt * j;
+			GLfloat t1 = t0 + dt;
 
-	glColor3f(1.0f, 1.0f, 1.0f);
-	gluSphere(quadratic, 1, 32, 32);
+			glTexCoord2f(s0, t0); 
+			glVertex3fv(radius*XVec3f(cos(phi0)*cos(theta0), cos(phi0)*sin(theta0), sin(phi0)));
+			glTexCoord2f(s1, t0);
+			glVertex3fv(radius*XVec3f(cos(phi0)*cos(theta1), cos(phi0)*sin(theta1), sin(phi0)));
+			glTexCoord2f(s1, t1);
+			glVertex3fv(radius*XVec3f(cos(phi1)*cos(theta1), cos(phi1)*sin(theta1), sin(phi1)));
+			glTexCoord2f(s0, t1);
+			glVertex3fv(radius*XVec3f(cos(phi1)*cos(theta0), cos(phi1)*sin(theta0), sin(phi1)));
+		}
+	}
+	glEnd();
+			
 	glEndList();
+
+	glEnable(GL_TEXTURE_2D);						// Enable Texture Mapping
 	return init_lights();
 }
 
@@ -220,17 +270,20 @@ void disp(void)
 
 
 	// TODO: call sphere-drawing display list.
-	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+/*	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 	glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 
 	glEnable(GL_TEXTURE_GEN_S);
 	glEnable(GL_TEXTURE_GEN_T);
-	glEnable(GL_TEXTURE_GEN_R);
+	glEnable(GL_TEXTURE_GEN_R);*/
+	glPushMatrix();
+	glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
 	glCallList(sphere);
-	glDisable(GL_TEXTURE_GEN_S);
+	glPopMatrix();
+/*	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);
-	glDisable(GL_TEXTURE_GEN_R);
+	glDisable(GL_TEXTURE_GEN_R);*/
 
 	glutSwapBuffers();
 }

@@ -27,6 +27,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ltga.h"
 #include <fstream>
+#include <iostream>
 
 //--------------------------------------------------
 // global functions
@@ -104,8 +105,10 @@ bool LTGA::LoadFromFile(const std::string &filename)
 
     std::ifstream file;
     file.open(filename.c_str(), std::ios::binary);
-    if (!file.is_open())
+    if (!file.is_open()) {
+		std::cerr << "LTGA::Error: can't find file\n";
         return false;
+	}
 
     bool rle = false;
     bool truecolor = false;

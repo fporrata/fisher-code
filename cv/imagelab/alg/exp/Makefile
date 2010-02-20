@@ -1,15 +1,20 @@
-VPATH			= ../alg_c
-VPATH			= ../alg_cxx 
-CXXFLAGS		:= -I ../alg_cxx `pkg-config --cflags opencv` \
-					`pkg-config --libs opencv`
+vpath	%.cpp 	../util ../lib ../class
+vpath	%.h		../include
 
-MAIN		:= edgedetect 
+CXXFLAGS		:= -I ../include `pkg-config --cflags opencv` \
+					`pkg-config --libs opencv` -g
 
+MAIN		:= edgedetect showImage testChamfer
+
+all: ${MAIN}
+
+testChamfer: testChamfer.cpp chamfer.o cvboost.o
 edgedetect: edgedetect.cpp EdgeDector.o
-	${CXX} ${CXXFLAGS} $^ -o $@
-
 showImage: showImage.cpp
-	${CXX} ${CXXFLAGS} $^ -o $@
+
+chamfer.o: chamfer.cpp
+EdgeDector.o: EdgeDector.cpp
+cvboost.o: cvboost.cpp
 
 clean:
-	rm -rf *.o edgedetect showImage
+	rm -rf *.o ${MAIN}

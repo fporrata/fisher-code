@@ -2,7 +2,7 @@
 #include <string>
 #include <cstdlib>
 
-#include "EdgeDector.h"
+#include "class.h"
 #include "highgui.h"
 #include "cv.h"
 

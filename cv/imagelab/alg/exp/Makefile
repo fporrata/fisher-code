@@ -9,7 +9,7 @@ MAIN		:= edgedetect showImage testChamfer
 all: ${MAIN}
 
 testChamfer: testChamfer.cpp chamfer.o cvboost.o
-edgedetect: edgedetect.cpp EdgeDector.o
+edgedetect: edgedetect.cpp EdgeDector.o cvboost.o
 showImage: showImage.cpp
 
 chamfer.o: chamfer.cpp

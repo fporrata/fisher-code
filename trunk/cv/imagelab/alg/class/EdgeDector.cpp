@@ -1,4 +1,4 @@
-#include "EdgeDector.h"
+#include "class.h"
 #include "highgui.h"
 
 void EdgeDector::detectEdges(const cv::Mat & img, cv::Mat & edges) {

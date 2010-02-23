@@ -5,6 +5,11 @@
 // See the specs at http://www.web3d.org/x3d/specifications/ISO-IEC-19775-X3DAbstractSpecification/
 // for more information.
 
+/* Name:		Fu Yu
+   Uniqname:	yufu
+   UMID:		33551750
+*/
+
 #include <math.h>
 #include <vector>
 #include <string>

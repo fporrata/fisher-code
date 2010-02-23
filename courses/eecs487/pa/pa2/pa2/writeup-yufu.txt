@@ -1,0 +1,10 @@
+1.
+My platform is Mac OS X.
+
+2.
+I try to create a reasonable glass effect with refraction, reflection and speculation. Because the shader can't be shown used properly by the current test cases, I create my own project folders to test the interest shaders. Folder "interest0" contains the project to show dialio_teapot.png and Folder "interest1" contains the project to show glass_ball.png.
+
+I realize that I may be in the risk of losing points on interest shader. May God bless me. I stay up the whole night for this.
+
+3.
+Assignment is good. I hope I can get some demo about the finished projects such that I can quickly understand what to do.

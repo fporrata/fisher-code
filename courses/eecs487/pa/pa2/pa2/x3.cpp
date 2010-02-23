@@ -4,6 +4,11 @@
 // NOTE: Constructors of node objects take a list of name-attribute string 
 // pairs list to get initialized. It is being called by the X3D parser.
 
+/* Name:		Fu Yu
+   Uniqname:	yufu
+   UMID:		33551750
+*/
+
 #include <sstream>
 
 #ifdef __APPLE__
@@ -13,6 +18,9 @@
 #endif
 
 #include "x3.h"
+
+#define NUM_TRI_SIDES	3
+#define NUM_QUAD_SIDES	4
 
 using namespace std;
 
@@ -328,7 +336,7 @@ void X3IndexedFaceSet::Render() const {
   glBegin(GL_TRIANGLES);
   for (std::vector<XVec3i>::const_iterator it = triangles_.begin();
 			it != triangles_.end(); it++) {
-	  for (int i = 0; i < 3; i++) {
+	  for (int i = 0; i < NUM_TRI_SIDES; i++) {
 		  glNormal3fv(normals_[(*it)(i)]);
 		  glVertex3fv(coordinate_->point((*it)(i)));
 	  }
@@ -337,7 +345,7 @@ void X3IndexedFaceSet::Render() const {
   glBegin(GL_QUADS);
   for (std::vector<XVec4i>::const_iterator it = quads_.begin();
 		  it != quads_.end(); it++) {
-	  for (int i = 0; i < 4; i++) {
+	  for (int i = 0; i < NUM_QUAD_SIDES; i++) {
 		  glNormal3fv(normals_[(*it)(i)]);
 		  glVertex3fv(coordinate_->point((*it)(i)));
 	  }
@@ -360,24 +368,28 @@ void X3IndexedFaceSet::Add(X3NodeType type, X3Node* node) {
 	//cout << "Number of coordinates: " << coordinate_->size() << endl;
 	//cout << "Number of coord indices: " << coord_index_.size() << endl;
 	XVec3f normal;
+
+	// Calculate the triangles' normal
 	for (std::vector<XVec3i>::iterator it = triangles_.begin();
 			it != triangles_.end(); it++) {
 		normal = polyNormal(coordinate_->point((*it)(0)),
 								   coordinate_->point((*it)(1)),
 								   coordinate_->point((*it)(2)));
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < NUM_TRI_SIDES; i++)
 			normals_[(*it)(i)] += normal;
 	}
 
+	// Calculate the quad normal
 	for (std::vector<XVec4i>::iterator it = quads_.begin();
 			it != quads_.end(); it++) {
 		normal = polyNormal(coordinate_->point((*it)(0)),
 								   coordinate_->point((*it)(1)),
 								   coordinate_->point((*it)(2)));
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < NUM_QUAD_SIDES; i++)
 			normals_[(*it)(i)] += normal;
 	}
 
+	// Normalize each normal
 	for (std::vector<XVec3f>::iterator it = normals_.begin();
 			it != normals_.end(); it++) {
 		it->normalize();
@@ -459,10 +471,10 @@ void X3Material::Print(std::ostream& ost, int offset) const {
 void X3Material::Render() const {
   // YOUR CODE HERE: Modify this function to properly 
   // setup OpenGL material properties.
-	glMaterialfv(GL_FRONT, GL_AMBIENT, &ambient_intensity_);
+	glMaterialf(GL_FRONT, GL_AMBIENT, ambient_intensity_);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_color_);
 	glMaterialfv(GL_FRONT, GL_EMISSION, emissive_color_);
-	glMaterialfv(GL_FRONT, GL_SHININESS, &shininess_);
+	glMaterialf(GL_FRONT, GL_SHININESS, shininess_ * 128);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular_color_);
 }
 
@@ -493,6 +505,7 @@ void X3PointLight::SetupLights(int* light_count) const {
   // You need to be setting up light with id GL_LIGHT0 + *light_count
 	GLenum light = GL_LIGHT0 + *light_count;
 	glLightf(light, GL_AMBIENT, X3LightNode::ambient_intensity());
+	glLightf(light, GL_DIFFUSE, X3LightNode::intensity());
 	glLightfv(light, GL_POSITION, location_);
 
 

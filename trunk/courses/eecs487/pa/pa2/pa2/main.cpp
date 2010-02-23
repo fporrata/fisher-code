@@ -1,3 +1,7 @@
+/* Name:		Fu Yu
+   Uniqname:	yufu
+   UMID:		33551750
+*/
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
@@ -37,6 +41,8 @@ XVec2i down_lmb;
 
 GLhandleARB g_hpo_interesting; // interesting program object handle
 GLhandleARB g_hpo_phong; // Phong program object handle
+
+
 
 
 // Function prototypes.

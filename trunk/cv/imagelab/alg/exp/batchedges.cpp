@@ -23,7 +23,8 @@ int main (int argc, char * argv[])
 		imageNames.push_back(argv[i+1]);
 	}
 
-	int width_arr[] = {500, 1000, 1500, 2000, 2500};
+	//int width_arr[] = {500, 1000, 1500, 2000, 2500};
+	int width_arr[] = {0};
 	vector<int> width(width_arr, width_arr + sizeof(width_arr) / sizeof(int));;
 	
 
@@ -34,15 +35,16 @@ int main (int argc, char * argv[])
 		for (int j = 0; j < width.size(); j++) {
 
 			//Resize the original image
-			Mat curImage(Size(width[j], image.size().height * width[j] / image.size().width), 
+			//Mat curImage(Size(width[j], image.size().height * width[j] / image.size().width), 
 					//CV_MAKETYPE(image.depth(), image.channels()));
-					CV_8UC1);
-			resize(image, curImage, curImage.size());
-			Mat dest(curImage.size(), CV_8UC1);
+					//CV_8UC1);
+			//resize(image, curImage, curImage.size());
+			Mat dest(image.size(), CV_8UC1);
 
 			//namedWindow("Image", 1);
 
-			CannyDector(curImage, dest, 400.0, 650.0, 5, true);
+			//CannyDector(curImage, dest, 400.0, 650.0, 5, true);
+			CannyDector(image, dest, 120.0, 150.0, 3, false);
 
 			Mat edges(dest.size(), CV_8UC1);
 			dest.convertTo(edges, CV_8UC1);
@@ -59,7 +61,7 @@ int main (int argc, char * argv[])
 			imwrite(destImageName.str(), edges);
 
 			// Release memory
-			curImage.release();
+			//curImage.release();
 			dest.release();
 			edges.release();
 		}

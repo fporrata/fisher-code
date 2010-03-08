@@ -21,7 +21,7 @@ int main (int argc, char * argv[])
 
 	namedWindow("Image", 1);
 	
-	CannyDector(argv[1], dest, 400.0, 650.0, 5, true);
+	CannyDector(argv[1], dest, 500.0, 650.0, 5, true);
 
 	Mat edges(dest.size(), CV_8UC1);
 	dest.convertTo(edges, CV_8UC1);

@@ -23,9 +23,9 @@ int main (int argc, char * argv[])
 		imageNames.push_back(argv[i+1]);
 	}
 
-	//int width_arr[] = {500, 1000, 1500, 2000, 2500};
+	//int width_arr[] = {500, 800, 1000};
 	int width_arr[] = {0};
-	vector<int> width(width_arr, width_arr + sizeof(width_arr) / sizeof(int));;
+	vector<int> width(width_arr, width_arr + sizeof(width_arr) / sizeof(int));
 	
 
 	for (int i = 0; i < numImages; i++) {
@@ -35,16 +35,24 @@ int main (int argc, char * argv[])
 		for (int j = 0; j < width.size(); j++) {
 
 			//Resize the original image
-			//Mat curImage(Size(width[j], image.size().height * width[j] / image.size().width), 
-					//CV_MAKETYPE(image.depth(), image.channels()));
+			Mat curImage;
+			
+			if (width[j] != 0) {
+				curImage = Mat(Size(width[j], image.size().height * width[j] / image.size().width), 
+					CV_MAKETYPE(image.depth(), image.channels()));
+				resize(image, curImage, curImage.size());
+			} else {
+				//curImage = Mat(image.size(), image.type());
+				curImage = image.clone();
+			}
 					//CV_8UC1);
-			//resize(image, curImage, curImage.size());
-			Mat dest(image.size(), CV_8UC1);
+			Mat dest(curImage.size(), CV_8UC1);
 
 			//namedWindow("Image", 1);
 
-			//CannyDector(curImage, dest, 400.0, 650.0, 5, true);
-			CannyDector(image, dest, 120.0, 150.0, 3, false);
+			//CannyDector(curImage, dest, 500.0, 650.0, 5, true);
+			CannyDector(curImage, dest, 100.0, 150.0, 3, true);
+			//CannyDector(image, dest, 120.0, 150.0, 3, false);
 
 			Mat edges(dest.size(), CV_8UC1);
 			dest.convertTo(edges, CV_8UC1);
@@ -55,13 +63,16 @@ int main (int argc, char * argv[])
 			//string destImage = argv[1];
 			stringstream destImageName;
 			destImageName << "edge_data/edges_";
-			destImageName << width[j] << "_";
+			if (width[j] != 0)
+				destImageName << width[j] << "_";
+			else
+				destImageName << curImage.size().width << "_";
 			destImageName << imageNames[i].substr(imageNames[i].find_last_of("\\/")+1);
 			//cout << destImage << endl;
 			imwrite(destImageName.str(), edges);
 
 			// Release memory
-			//curImage.release();
+			curImage.release();
 			dest.release();
 			edges.release();
 		}

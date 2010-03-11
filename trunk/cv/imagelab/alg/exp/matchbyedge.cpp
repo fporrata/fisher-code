@@ -66,11 +66,13 @@ int main (int argc, char * argv[])
 	getFileNames(dir, filenames);
 	sort(filenames.begin(), filenames.end());
 
+	cout << "There are totally " << filenames.size() << " files\n\n";
+
 	//for (int i = 0; i < filenames.size(); i++) {
 	//	cout << filenames[i] << endl;
 	//}
 
-	//filenames.resize(10);
+	//filenames.resize(5);
 	vector<double> scores(filenames.size());
 	vector<Point2i> poses(filenames.size());
 
@@ -100,13 +102,23 @@ int main (int argc, char * argv[])
 	fs << "Rank " << setw(10) << "score" << setw(6) << "x" << setw(6) << "y"
 		<< "\t" << "filename" << endl;
 	for (int i = 0; i < scoreboard.size(); i++) {
-		fs << setw(5) << i+1 << setw(10) << scoreboard[i].score
+		fs << setw(4) << i+1 << setw(10) << scoreboard[i].score
 			<< setw(6) << scoreboard[i].pos.x
 			<< setw(6) << scoreboard[i].pos.y
 			<< "\t" << scoreboard[i].filename
 			<< endl;
 	}
 	fs.close();
+
+	cout << "\n\nMove the top images\n";
+	int topN = 10;
+	string topDir = string("./top_images/");
+	for (int i = 0; i < topN && i < scoreboard.size(); i++) {
+		string cmd = "cp " + dir + scoreboard[i].filename + " "
+						+ topDir + scoreboard[i].filename;
+		cout << "Command: " << cmd << endl;
+		system(cmd.c_str());
+	}
 
 	return 0;
 }

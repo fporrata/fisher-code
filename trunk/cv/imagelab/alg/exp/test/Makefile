@@ -4,11 +4,12 @@ vpath	%.h		../../include
 CXXFLAGS		:= -I ../../include `pkg-config --cflags opencv` \
 					`pkg-config --libs opencv` -g
 
-MAIN		:= rotate
+MAIN		:= rotate system
 
 all: ${MAIN}
 
 rotate: rotate.cpp cvboost.o
+system: system.cpp
 
 chamfer.o: chamfer.cpp
 EdgeDector.o: EdgeDector.cpp

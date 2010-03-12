@@ -13,6 +13,11 @@ struct Plane {
 	
 	Plane(Vec const& normal, Pt const& q0, Material const& m) :
     n(normal), q(q0), mat(m) {}
+
+	Plane(const Plane & p) :
+			n(p.n), q(p.q), mat(p.mat) {}
+
+	Plane() {}
 	
 	bool contains(Pt const& p) const;
 	
@@ -26,6 +31,9 @@ struct Plane {
 	// HUGE_VAL (largest representable double precision number) is
 	// returned.
 	double intersect(Ray const& ray) const;
+
+	Plane & operator=(const Plane &p);
+
 	
 };
 

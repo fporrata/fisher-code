@@ -41,7 +41,28 @@ double Sphere::intersect(Ray const& ray) const
     // 't' for which this occurs. If it doesn't intersect, return
     // NAN, which is #defined in a file included by cmath (math.h)
 
-    return NAN; 
+		double t;
+
+		if (is_intersecting(ray)) {
+				Vec d = ray.v.normalized();
+				Pt e = ray.p;
+				Pt c = o;
+				Vec l = c - e;
+				double l_sq = dot(l, l);
+				double t_ca = dot(l, d);
+				double d_sq = l_sq - t_ca * t_ca;
+				double t_hc = sqrt(r * r - d_sq);
+
+				//cout << "t_ca: " << t_ca << " t_hc: " << t_hc << endl;
+				if (l_sq > r * r)
+						t = t_ca - t_hc;
+				else
+						t = t_ca + t_hc;
+				//cout << "t: " << t << endl;
+		} else {t = NAN;}
+
+
+    return t; 
 }
 
 

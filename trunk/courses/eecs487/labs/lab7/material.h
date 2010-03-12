@@ -19,6 +19,7 @@ struct Material {
 	   Color const& sp,
 	   double s0=0) :
     amb(a), diff(d), spec(sp), s(s0) {}
+	Material() {}
 };
 
 

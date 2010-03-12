@@ -4,6 +4,13 @@
 #define __POINT_H__
 
 #include <cmath>
+#include <cassert>
+#include <iostream>
+#include <fstream>
+
+#define EPSILON 1E-15
+
+using namespace std;
 
 // square the argument
 static inline double sqr(double const& x) { return x*x; }
@@ -179,7 +186,9 @@ struct Ray {
   Pt pt(double const& t) const { 
     Vec const tempv = t*v;
     return p+tempv; 
-  }
+  }  
+	
+	friend ostream &operator<<(ostream &stream, Ray ray);
 };
 
 

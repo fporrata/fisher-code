@@ -1,4 +1,6 @@
 #include <iostream>
+#include <map>
+#include <vector>
 
 extern "C" {
 #ifdef __APPLE__
@@ -73,6 +75,22 @@ Color raytrace(Ray const& ray, bool touched_sphere)
   static Material const tb_mat(Color::BLACK, Color(.3,.3,1), Color::BLACK);
   static Plane const bottom_wall( Vec::Y, Pt(0,-600,0), tb_mat);
   static Plane const top_wall   (-Vec::Y, Pt(0,600,0),  tb_mat);
+
+	static vector<const Plane *> planemap(6); // Map for the planes
+	static vector<const Material *> matmap(6); // Map for the materials
+
+	planemap[0] = &back_wall;
+	planemap[1] = &front_wall;
+	planemap[2] = &left_wall;
+	planemap[3] = &right_wall;
+	planemap[4] = &bottom_wall;
+	planemap[5] = &top_wall;
+
+	matmap[0] = matmap[1] = &fb_mat;
+	matmap[2] = matmap[3] = &lr_mat;
+	matmap[4] = matmap[5] = &tb_mat;
+
+	Color color;
   
 
   if(touched_sphere || !reflecting_sphere.is_intersecting(ray)) {
@@ -96,9 +114,33 @@ Color raytrace(Ray const& ray, bool touched_sphere)
     // (5) [optional] Basic shadow: If the ray from light source to point on the wall intersects
     //     the sphere, then the sphere casts a shadow. Otherwise the wall reflects light
     //     in the usual way. This should be an easy modification.
+	
+		
+		double t[6];
+		double t_c = INFINITY; // closest t
+		int	idx_c; // closest index
 
+		//Intersection with each plane
+		for (int i = 0; i < 6; i++) {
+				t[i] = planemap[i]->intersect(ray);
+				//if (touched_sphere) cout << "t" << i << ": " << t[i] << endl;
+				if (t[i] >= 0 && t[i] < t_c) {
+						t_c = t[i];
+						idx_c = i;
+				}
+		}
 
+		Pt intPt = ray.pt(t_c);
+		Ray shadow = Ray(intPt, light0.o - intPt);
+		if (reflecting_sphere.is_intersecting(shadow))
+				color = Color::BLACK;
+		else
+				color = light0.pt(intPt, planemap[idx_c]->n, *matmap[idx_c]);
 
+		/*if (touched_sphere) {
+				cout << "* color: " << color.r << " " << color.g << " " << color.b << endl;
+				cout << "* t_c: " << t_c << " idx_c: " << idx_c << endl;
+		}*/
   }
   else {
 
@@ -110,8 +152,22 @@ Color raytrace(Ray const& ray, bool touched_sphere)
     // (3) Create the reflected ray with this point and direction.
     // (4) recurse this function setting the touched_sphere flag as true.
 
+		Ray nray = ray;
+		nray.v = nray.v.normalized();
+		Pt intPt = nray.pt(reflecting_sphere.intersect(nray)); // Intersection point
+		//cout << "Point: " << intPt.x << " " << intPt.y << " " << intPt.z << endl;
+		Vec norm = reflecting_sphere.unit_normal(intPt);
+		Vec refl = nray.v - 2 * norm * dot(norm, nray.v);
+		refl = refl.normalized();
+		Ray ray_reflected(intPt, refl);
+
+		//cout << ray_reflected << endl;
+
+		color = raytrace(ray_reflected, true);
+		//cout << "* color: " << color.r << " " << color.g << " " << color.b << endl;
+
   }
   
-  return Color();
+  return color;
 }
 

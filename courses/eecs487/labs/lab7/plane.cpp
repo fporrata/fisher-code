@@ -21,8 +21,19 @@ bool Plane::is_intersecting(Ray const& ray) const {
 double Plane::intersect(Ray const& ray) const {
     
     // ** TODO **
-	// What if dot(ray.v, n) == 0
-	int t = dot(ray.p - q, n) / dot(ray.v, n);
 	
-    return t;
+	if (is_intersecting(ray)) {
+			Vec norm = n.normalized();
+			return dot(q - ray.p, norm) / dot(ray.v, norm);
+	} else
+			return HUGE_VAL;
+}
+
+Plane & Plane::operator=(const Plane & p)
+{
+		n = p.n;
+		q = p.q;
+		mat = p.mat;
+
+		return *this;
 }

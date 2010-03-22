@@ -182,7 +182,7 @@ bool LoadScene(SceneT& scene, CameraT& cam, OptionsT& options,
       // YOUR CODE HERE
       // construct the area light and add it to the scene
       // scene.AddLight(light);
-			AreaLightT *light = new AreaLightT(width, color);
+			AreaLightT *light = new AreaLightT(corner, veca, vecb, color);
 			scene.AddLight(light);
     } else if(EqualStr(line, "shininess")) {
       float c;

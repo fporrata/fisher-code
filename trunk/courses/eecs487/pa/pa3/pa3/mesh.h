@@ -54,6 +54,9 @@ public:
 
     // YOUR CODE HERE
     // add the bounding volume testing here
+		hitinfo_t hit_bv;
+		if (!bv.Intersect(ray, hit_bv))
+				return false;
 
 
     std::vector<triangle_t>::const_iterator ti, timin = m_fs.end();
@@ -185,10 +188,19 @@ public:
   void ComputeBV() {
     // YOUR CODE HERE 
     // initialize the bounding sphere here
-
+		XVec3f min_vec = m_vs[0].m_pos, max_vec = m_vs[0].m_pos;
+		for (std::vector<vertex_t>::iterator vi = m_vs.begin(); vi < m_vs.end(); vi++) {
+			for (int j = 0; j < 3; j++) {
+				if (min_vec[j] > vi->m_pos[j]) min_vec[j] = vi->m_pos[j];
+				if (max_vec[j] < vi->m_pos[j]) max_vec[j] = vi->m_pos[j];
+			}
+		}
+		XVec3f bv_c = (min_vec + max_vec) / 2;
+		float bv_r = bv_c.dist(min_vec);
+		bv = BallT(bv_r, bv_c);
   }
 
-  /// Set a particular shading mode: flat or phong
+  /// Set a particular shading mode: flat or phong EPSILON
   void SetShading(int _shade) {
     m_shade = _shade;
   }
@@ -198,6 +210,8 @@ private:
   std::vector<vertex_t> m_vs;
   /// a container of mesh triangles
   std::vector<triangle_t> m_fs;
+
+	BallT bv;	
 public:
   float m_shine;
   XFormf m_xf, m_xfi;

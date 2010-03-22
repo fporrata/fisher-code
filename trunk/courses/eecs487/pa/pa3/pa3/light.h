@@ -29,10 +29,9 @@ public:
 /// A simple point light class
 class PointLightT: public ILight {
 public:
-  PointLightT(const XVec3f& _pos, const XVec3f& _color) 
-    : m_pos(_pos), m_color(_color)
-  {
-  }
+  PointLightT(const XVec3f & pos, const XVec3f & color) 
+			: m_pos(pos), m_color(color)
+  {}
   virtual ~PointLightT() {}
   virtual XVec3f SamplePos() const { return m_pos; }
   virtual XVec3f Color() const { return m_color; }
@@ -47,16 +46,17 @@ private:
 
 class AreaLightT: public ILight{
 	public:
-		AreaLightT(const float width, const XVec3f & color)
-			: m_width(width), m_color(color) {}
+		AreaLightT(const XVec3f & corner, 
+							 const XVec3f & side1, 
+							 const XVec3f & side2, 
+							 const XVec3f & color) 
+				: m_corner(corner), m_side1(side1), m_side2(side2), m_color(color)
+		{}
 
 		virtual ~AreaLightT() {}
 		virtual XVec3f SamplePos() const 
 		{ 
-			return XVec3f(0.0f);
-			return XVec3f(-m_width + 2 * frand() * m_width,
-										-m_width + 2 * frand() * m_width,
-										0.0f);
+				return m_corner + frand() * m_side1 + frand() * m_side2;
 		}
 		virtual XVec3f Color() const { return m_color; }
 		virtual void HintSample(int k) {}
@@ -64,7 +64,9 @@ class AreaLightT: public ILight{
 			return NULL;
 		}
 	private:
-		float m_width;
+		XVec3f m_corner;
+		XVec3f m_side1;
+		XVec3f m_side2;
 		XVec3f m_color;
 };
 

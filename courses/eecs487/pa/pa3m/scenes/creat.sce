@@ -7,13 +7,13 @@ eyeup 0.0 0.0 1.0
 wdist 1.0
 fovy_deg 50
 
-nx 1200
-ny 900
+nx 400
+ny 300
 
 #options
 
 max_recursion 4
-aasample 4
+aasample 0
 # scene
 
 background 0 0 0.6

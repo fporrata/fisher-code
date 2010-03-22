@@ -10,7 +10,7 @@ else
   LIBS = -lglut -lexpat
 endif
 
-CPPFLAGS = -g -m32 $(INCLUDES)
+CPPFLAGS = -g $(INCLUDES)
 
 OBJS = main.o shaders.o ltga.o ../../common/src/glew.o
 

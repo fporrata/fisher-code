@@ -33,7 +33,7 @@ ca 0.1 0.1 0.1
 #spheres
 
 {
-	ca 0.2 0 0
+	ca 0.2 0.2 0.2
 	cr 0.5 0.5 0.5
 	cp 0.5 0.5 0.5
 	shininess 100
@@ -47,7 +47,7 @@ ca 0.1 0.1 0.1
 		ball 0.3 0 0 0
 	pop_matrix
 
-	ca 0.0 0.2 0
+	ca 0.2 0.2 0.2
 	cr 1 0.4 0.4
 	cp 0.2 0.2 0.2
 
@@ -63,13 +63,13 @@ ca 0.1 0.1 0.1
 }
 
 {
-	translate 1 0 0
-#pointlight 3 0 4   0.8 0.8 0.6
+	translate 1 -1 0
+	pointlight 3 0 4   0.6 0.6 0.4
 }
 
 {
-	translate -1 0 5
-	arealight 0.3 0.8 0.8 0.6
+	translate -1 -1 5
+	pointlight 3 0 4   0.4 0.4 0.8
 }
 
 end

@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "gel.h"
+#include "constants.h"
 
 #include <vector>
 #include "material.h"

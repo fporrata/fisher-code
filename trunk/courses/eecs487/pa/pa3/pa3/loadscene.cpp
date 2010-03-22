@@ -4,6 +4,7 @@
 #include "ball.h"
 #include "triangle.h"
 #include "mesh.h"
+#include "cylinder.h"
 
 
 #include <iostream>
@@ -90,12 +91,14 @@ bool LoadScene(SceneT& scene, CameraT& cam, OptionsT& options,
       }
       BallT* ball = new BallT(radius, center, xforms.top());
       ball->m_mat = states.top().m_mat;
-      scene.AddGel(ball); 
+      scene.AddGel(ball);
     } else if(EqualStr(line, "cylinder")) {
 
       // YOUR CODE HERE
       // construct a cylinder and add it to the scene
-
+			CylinderT* cylinder = new CylinderT(xforms.top());
+			cylinder->m_mat = states.top().m_mat;
+			scene.AddGel(cylinder);
     } else if(EqualStr(line, "object_flat")) {
       char buf[1024];
       int nread = sscanf(line.c_str(), "%s %s", dummy, buf);
@@ -179,7 +182,8 @@ bool LoadScene(SceneT& scene, CameraT& cam, OptionsT& options,
       // YOUR CODE HERE
       // construct the area light and add it to the scene
       // scene.AddLight(light);
-      
+			AreaLightT *light = new AreaLightT(width, color);
+			scene.AddLight(light);
     } else if(EqualStr(line, "shininess")) {
       float c;
       int nread = sscanf(line.c_str(), "%s %f", dummy, &c);

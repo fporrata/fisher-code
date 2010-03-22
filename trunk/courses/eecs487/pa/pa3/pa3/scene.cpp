@@ -3,7 +3,7 @@
 
 using namespace std;
 
-const float EPSILON = 0.0001f;
+//const float EPSILON = 0.0001f;
 
 /// Intersects a ray [EPSILON, +infinity) with the scene
 /// returns true and fills in the hitinfo structure if the ray hits the scene

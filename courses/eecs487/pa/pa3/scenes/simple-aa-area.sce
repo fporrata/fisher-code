@@ -64,7 +64,7 @@ ca 0.1 0.1 0.1
 
 {
 	translate 1 0 0
-	#pointlight 3 0 4   0.8 0.8 0.6
+	pointlight 3 0 4   0.8 0.8 0.6
 }
 
 {

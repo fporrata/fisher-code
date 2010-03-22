@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
   if(!LoadScene(scene, cam, opts, argv[1]))
     return 1;
 
+	//opts.m_max_recursion = 0;
+
   /// Constructs an image object
   XImageT<XVec3b> xim;
   xim.Allocate(cam.m_nx, cam.m_ny);

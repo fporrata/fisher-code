@@ -93,6 +93,10 @@ public:
     case PHONG_SHADE:
       // YOUR CODE HERE
       // set the phong normal using umin, vmin, and timin
+			//*hit.m_normal = (*timin).m_normal;
+			hit.m_normal = (1.0f-umin-vmin)*m_vs[(*timin).m_inds[0]].m_normal
+      + umin*m_vs[(*timin).m_inds[1]].m_normal
+      + vmin*m_vs[(*timin).m_inds[2]].m_normal;
       break;
     }
 

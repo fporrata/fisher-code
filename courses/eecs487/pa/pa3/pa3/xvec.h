@@ -275,6 +275,13 @@ inline XVec<3, double> XVec<3, double>::cross(
                 m_v[0] * c.m_v[1] - m_v[1] * c.m_v[0] ); 
 }
 
+template<int dim, class real_type>
+inline void swap(XVec<dim, real_type> & v0, XVec<dim, real_type> & v1)
+{
+	XVec<dim, real_type> tmp = v0;
+	v0 = v1;
+	v1 = tmp;
+}
 
 
 #ifndef _NO_IOSTREAMS

@@ -100,6 +100,30 @@ void RayTracerT::TraceAll(const CameraT& cam, XImageT<XVec3b>& image) {
   }
 }
 
+XVec3f diffuse(const hitinfo_t & hit, ILight * light, const SceneT & scene)
+{
+	vector<XVec3f> samplePos;
+	if (typeid(*light) == typeid(PointLightT)) {
+			PointLightT * al = dynamic_cast<PointLightT*>(light);
+			samplePos.push_back(al->SamplePos());
+	} else if (typeid(*light) == typeid(AreaLightT)) {
+		AreaLightT * al = dynamic_cast<AreaLightT*>(light);
+		samplePos = al->jitterPos(NUM_SAMPLE_AREA_LIGHT);
+	}
+
+	XVec3f color(0.0f);
+	for (int i = 0; i < samplePos.size(); i++) {
+		ray_t shadow_ray = ray_t(hit.m_pos, samplePos[i] - hit.m_pos);
+		hitinfo_t shadow_hit;
+		if ((!scene.Intersect(shadow_ray, shadow_hit)) ||
+				shadow_hit.m_t < 0 || shadow_hit.m_t > 1)
+			color += light->Color();
+	}
+	color /= samplePos.size();
+
+	return color;
+}
+
 /// Returns the color from the shading computation using
 /// the information in the hitinfo_t structure
 /// level is the recursion level
@@ -125,11 +149,12 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level) {
 
 		XVec3f refl_color = Trace(ray_t(hit.m_pos, 2 * n * n.dot(v) - v), level+1); // Reflected color
 
-		ray_t shadow_ray = ray_t(hit.m_pos, (*it)->SamplePos() - hit.m_pos);
+		/*ray_t shadow_ray = ray_t(hit.m_pos, (*it)->SamplePos() - hit.m_pos);
 		hitinfo_t shadow_hit;
 		XVec3f diff_color(0.0f, 0.0f, 0.0f);
 		if ((!m_scene.Intersect(shadow_ray, shadow_hit)) || shadow_hit.m_t < 0 || shadow_hit.m_t > 1)
-			diff_color = (*it)->Color();
+			diff_color = (*it)->Color();*/
+		XVec3f diff_color = diffuse(hit, (*it), m_scene);
 		
 		color += diff_color * hit.m_mat.m_cr * max(0.0f, n.dot(l)) + 
 						 refl_color * hit.m_mat.m_cp * pow(max(0.0f, n.dot(h)), hit.m_mat.m_p);

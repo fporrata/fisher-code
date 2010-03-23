@@ -63,6 +63,19 @@ class AreaLightT: public ILight{
 		virtual std::vector<XVec2f>* Jitters() {
 			return NULL;
 		}
+		std::vector<XVec3f> jitterPos(int nsample) {
+			float sub_side = 1.0 / nsample;
+			std::vector<XVec3f> jp;
+			for (int i = 0; i < nsample; i++) {
+				for (int j = 0; j < nsample; j++) {
+					jp.push_back(m_corner + m_side1 * (i + frand()) * sub_side +
+											 m_side2 * (j + frand()) * sub_side);
+				}
+			}
+
+			return jp;
+		}
+
 	private:
 		XVec3f m_corner;
 		XVec3f m_side1;

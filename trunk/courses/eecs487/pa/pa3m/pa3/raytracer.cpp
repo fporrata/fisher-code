@@ -156,8 +156,11 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level) {
 			diff_color = (*it)->Color();*/
 		XVec3f diff_color = diffuse(hit, (*it), m_scene);
 		
-		color += diff_color * hit.m_mat.m_cr * max(0.0f, n.dot(l)) + 
-						 refl_color * hit.m_mat.m_cp * pow(max(0.0f, n.dot(h)), hit.m_mat.m_p);
+		/*color += diff_color * hit.m_mat.m_cr * max(0.0f, n.dot(l)) + 
+						 refl_color * hit.m_mat.m_cp * pow(max(0.0f, n.dot(h)), hit.m_mat.m_p);*/
+		color += diff_color * (hit.m_mat.m_cr * max(0.0f, n.dot(l)) +
+						 hit.m_mat.m_cp * pow(max(0.0f, n.dot(h)), hit.m_mat.m_p))
+						 +refl_color * hit.m_mat.m_cp;
 		// How could the dot product be 0?
 	}
 

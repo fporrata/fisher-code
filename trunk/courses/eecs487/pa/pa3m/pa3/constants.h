@@ -1,1 +1,2 @@
 #define EPSILON 0.0001f
+#define NUM_SAMPLE_AREA_LIGHT 3

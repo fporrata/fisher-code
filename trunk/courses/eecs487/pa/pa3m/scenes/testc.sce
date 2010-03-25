@@ -47,13 +47,8 @@ rotate 36 0 0 1
 	scale 0.5 0.5 0.5
 	cr 0.8 0.4 0.4 
 	cp 0.0 0.0 0.0
-<<<<<<< .mine
-	alpha 0.3
-	ri 1.2
-=======
 	ri 1.6
 	alpha 0.01
->>>>>>> .r60
 	object_flat cube.ob
 }
 

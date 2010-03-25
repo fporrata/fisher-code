@@ -71,7 +71,8 @@ void RayTracerT::TraceAll(const CameraT& cam, XImageT<XVec3b>& image) {
     for(int j=0; j<cam.m_ny; ++j) {
       // generate a ray from the eye
       XVec3f color(0.0f);
-
+						stack<float> ris;
+						ris.push(1.0f);
       if(m_opts.m_aasample<=0) {
         // YOUR CODE HERE
         // viewing ray generation code replacing this default wrong ray
@@ -79,14 +80,15 @@ void RayTracerT::TraceAll(const CameraT& cam, XImageT<XVec3b>& image) {
         
         m_current_sample = 0;
        
-        color = Trace(vray);
+        color = Trace(vray, 0, ris);
       } else {
         // YOUR CODE HERE
         // antialiasing and area light setup
 				for (int si = 0; si < m_opts.m_aasample; si++) {
 					for (int sj = 0; sj < m_opts.m_aasample; sj++) {
 						ray_t vray(cam.m_eyepos, screen_points_aa[i][j][si][sj] - cam.m_eyepos);
-						color += Trace(vray);
+
+						color += Trace(vray, 0, ris);
 					}
 				}
 
@@ -112,7 +114,7 @@ XVec3f diffuse(const hitinfo_t & hit, ILight * light, const SceneT & scene)
 	}
 
 	XVec3f color(0.0f);
-	for (int i = 0; i < samplePos.size(); i++) {
+	for (unsigned int i = 0; i < samplePos.size(); i++) {
 		ray_t shadow_ray = ray_t(hit.m_pos, samplePos[i] - hit.m_pos);
 		hitinfo_t shadow_hit;
 		if ((!scene.Intersect(shadow_ray, shadow_hit)) ||
@@ -124,10 +126,26 @@ XVec3f diffuse(const hitinfo_t & hit, ILight * light, const SceneT & scene)
 	return color;
 }
 
+XVec3f refract(const XVec3f & in_dir, const XVec3f & norm, float n1, float n2)
+{
+	XVec3f ri = in_dir;
+	ri /= ri.normalize();
+	XVec3f n = norm;
+	n /= n.normalize();
+	float kernel = 1 - n1 * n1 / (n2 * n2) * (1 - n.dot(ri) * n.dot(ri));
+	XVec3f rt = ri * n1 / n2 - n * (n.dot(ri) * n1 / n2 +
+				 sqrt(kernel));
+
+	/*cout << "ri is " << ri << endl;
+	cout << "rt is " << rt << endl;
+*/
+	return rt;
+}
+
 /// Returns the color from the shading computation using
 /// the information in the hitinfo_t structure
 /// level is the recursion level
-XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level) {
+XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level, stack<float> ris) {
   XVec3f color(0.0f);
 
   // Ambient light contribution
@@ -137,17 +155,16 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level) {
   // shading code here 
   // iterate over the lights and collect their contribution
   // make a recursive call to Trace() function to get the reflections
-	for (SceneT::LightCt::const_iterator it = m_scene.BeginLights(); it < m_scene.EndLights(); it++) {
-		XVec3f n = hit.m_normal;
-		n = n / n.normalize();
-		XVec3f l = (*it)->SamplePos() - hit.m_pos;
-		l = l / l.normalize();
 		XVec3f v = -hit.m_indir;
 		v = v / v.normalize();
+		XVec3f n = hit.m_normal;
+		n = n / n.normalize();
+	for (SceneT::LightCt::const_iterator it = m_scene.BeginLights(); it < m_scene.EndLights(); it++) {
+		XVec3f l = (*it)->SamplePos() - hit.m_pos;
+		l = l / l.normalize();
 		XVec3f h = (l + v);
 		h = h / h.normalize();
 
-		XVec3f refl_color = Trace(ray_t(hit.m_pos, 2 * n * n.dot(v) - v), level+1); // Reflected color
 
 		/*ray_t shadow_ray = ray_t(hit.m_pos, (*it)->SamplePos() - hit.m_pos);
 		hitinfo_t shadow_hit;
@@ -159,11 +176,36 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level) {
 		/*color += diff_color * hit.m_mat.m_cr * max(0.0f, n.dot(l)) + 
 						 refl_color * hit.m_mat.m_cp * pow(max(0.0f, n.dot(h)), hit.m_mat.m_p);*/
 		color += diff_color * (hit.m_mat.m_cr * max(0.0f, n.dot(l)) +
-						 hit.m_mat.m_cp * pow(max(0.0f, n.dot(h)), hit.m_mat.m_p))
-						 +refl_color * hit.m_mat.m_cp;
+						 hit.m_mat.m_cp * pow(fabs(n.dot(h)), hit.m_mat.m_p));
 		// How could the dot product be 0?
 	}
+	XVec3f refl_color = Trace(ray_t(hit.m_pos, 2 * n * n.dot(v) - v), level+1, ris); // Reflected color
+	color += refl_color * hit.m_mat.m_cp;
 
+	if (fabs(hit.m_mat.m_alpha - 1) > EPSILON) {
+		float n1, n2;
+		if (n.dot(v) > 0) {
+			//cout << ris.size() << endl;
+			n1 = ris.top(); 
+			n2 = hit.m_mat.m_ri;
+			ris.push(hit.m_mat.m_ri);
+		} else {
+			n1 = ris.top();
+			if (ris.size() == 1)
+				return color;
+			n2 = ris.top();
+			n = -n;
+		}
+		XVec3f refr_vec = refract(hit.m_indir, n, n1, n2);
+		if (refr_vec[0] != NAN) {
+			ray_t refr_ray = ray_t(hit.m_pos, refr_vec);
+			XVec3f refr_color = Trace(refr_ray, level+1, ris);
+
+			//cout << "refraction: " << refr_color << endl;
+
+			color = color * hit.m_mat.m_alpha + (1 - hit.m_mat.m_alpha) * refr_color;
+		}
+	}
 
   return color;
 }
@@ -171,7 +213,7 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level) {
 
 /// Returns the color value coming along the ray
 /// level is the recursion level
-XVec3f RayTracerT::Trace(const ray_t& ray, int level) {
+XVec3f RayTracerT::Trace(const ray_t& ray, int level, stack<float> ris) {
   // YOUR CODE HERE
   // limit the recursion level here
 
@@ -185,11 +227,12 @@ XVec3f RayTracerT::Trace(const ray_t& ray, int level) {
   hitinfo_t hit;
 
   if(!m_scene.Intersect(ray, hit)) {
-    return m_scene.BackgroundColor();
+		return m_scene.BackgroundColor();
 		//return XVec3f(1, 1, 1);
 	}
 
-  color = Shade(hit, level);
+	//cout << ris.size() << endl;
+  color = Shade(hit, level, ris);
 
   return color;
 }

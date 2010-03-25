@@ -12,7 +12,7 @@ ny 300
 
 #options
 
-max_recursion 4
+max_recursion 8
 aasample 4
 		
 # scene
@@ -50,6 +50,9 @@ ca 0.1 0.1 0.1
 	ca 0.2 0.2 0.2
 	cr 1 0.4 0.4
 	cp 0.2 0.2 0.2
+
+	alpha 0.3
+	ri 1.9
 
 	ball 0.3 0.5 2.0 1.0
 

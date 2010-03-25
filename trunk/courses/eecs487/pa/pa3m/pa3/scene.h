@@ -34,6 +34,8 @@ public:
   /// Tests intersection with the ray
   bool Intersect(const ray_t& ray, hitinfo_t& hit) const;
 
+	float alpha_intersect(const ray_t& ray, hitinfo_t & hit) const;
+
   /// returns the background color
   const XVec3f& BackgroundColor() const {
     return m_bkcolor;

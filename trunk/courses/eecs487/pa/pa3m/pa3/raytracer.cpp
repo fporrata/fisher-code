@@ -117,9 +117,11 @@ XVec3f diffuse(const hitinfo_t & hit, ILight * light, const SceneT & scene)
 	for (unsigned int i = 0; i < samplePos.size(); i++) {
 		ray_t shadow_ray = ray_t(hit.m_pos, samplePos[i] - hit.m_pos);
 		hitinfo_t shadow_hit;
-		if ((!scene.Intersect(shadow_ray, shadow_hit)) ||
-				shadow_hit.m_t < 0 || shadow_hit.m_t > 1)
-			color += light->Color();
+		float hit_alpha = scene.alpha_intersect(shadow_ray, shadow_hit);
+		//if ((!scene.Intersect(shadow_ray, shadow_hit)) ||
+			//	shadow_hit.m_t < 0 || shadow_hit.m_t > 1)
+		if (fabs(hit_alpha) > 10 * EPSILON)
+			color += light->Color() * hit_alpha;
 	}
 	color /= samplePos.size();
 
@@ -228,7 +230,7 @@ XVec3f RayTracerT::Trace(const ray_t& ray, int level, stack<float> ris) {
 
   if(!m_scene.Intersect(ray, hit)) {
 		return m_scene.BackgroundColor();
-		//return XVec3f(1, 1, 1);
+		//return XVec3f(1, 0, 0);
 	}
 
 	//cout << ris.size() << endl;

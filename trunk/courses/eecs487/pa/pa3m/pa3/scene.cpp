@@ -32,4 +32,28 @@ bool SceneT::Intersect(const ray_t& ray, hitinfo_t& hit) const {
   return result;
 }
 
+float SceneT::alpha_intersect(const ray_t& ray, hitinfo_t& hit) const {
+
+  GelCt::const_iterator gi;
+
+  hit.m_t = 1.0f;
+
+  hitinfo_t curhit;
+  curhit.m_indir = ray.m_dir;
+
+  float result = 1;
+
+  for(gi=m_gels.begin(); gi!=m_gels.end(); ++gi) {
+    if((*gi)->Intersect(ray, curhit)) {
+      //cerr << "intersected! " << curhit.m_t << endl;
+      if(curhit.m_t>EPSILON && curhit.m_t<hit.m_t) {
+        hit = curhit;
+        result *= (1 - curhit.m_mat.m_alpha);
+      }
+    }
+  }
+
+  return result;
+}
+
 

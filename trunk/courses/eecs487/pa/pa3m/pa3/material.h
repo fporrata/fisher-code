@@ -6,20 +6,34 @@
 /// Fundamentals of Computer Graphics, 2nd Edition, by Peter Shirley et al.
 /// 
 struct MaterialT {
-   MaterialT() {}
+   MaterialT() 
+	 {
+		 m_alpha = 1;
+		 m_ri = 1;
+	 }
 
    MaterialT(XVec3f _ca, XVec3f _cr, XVec3f _cp, float _p) 
       : m_ca(_ca), m_cr(_cr), m_cp(_cp), m_p(_p)
-      {}
+      {
+				m_alpha = 1;
+				m_ri = 1;
+			}
+	 MaterialT(XVec3f _ca, XVec3f _cr, XVec3f _cp, float _p, float _alpha, float _ri) 
+      : m_ca(_ca), m_cr(_cr), m_cp(_cp), m_p(_p), m_alpha(_alpha), m_ri(_ri)
+	 {}
+
 
    MaterialT(const MaterialT& _mat)
-      : m_ca(_mat.m_ca), m_cr(_mat.m_cr), m_cp(_mat.m_cp), m_p(_mat.m_p)
+      : m_ca(_mat.m_ca), m_cr(_mat.m_cr), m_cp(_mat.m_cp), m_p(_mat.m_p),
+				m_alpha(_mat.m_alpha), m_ri(_mat.m_ri)
       {}
 
    XVec3f m_ca;  // global ambient light color
    XVec3f m_cr;  // diffuse (and ambient) reflectance
    XVec3f m_cp;  // specular reflectance
    float m_p;   // "shininess"
+	 float	m_alpha;	// transparency
+	 float	m_ri;		// refractive index
 };
 
 #endif

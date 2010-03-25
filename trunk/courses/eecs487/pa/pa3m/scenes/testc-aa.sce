@@ -56,6 +56,8 @@ rotate 36 0 0 1
 	scale 0.5 0.5 0.5
 	cr 0.5 0.4 0.9 
 	cp 0.0 0.0 0.0
+	alpha 0.3
+	ri 1.2
 	object_flat cube.ob
 }
 

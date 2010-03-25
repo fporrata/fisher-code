@@ -212,6 +212,20 @@ bool LoadScene(SceneT& scene, CameraT& cam, OptionsT& options,
         cerr << "ERROR: " << line << endl;
       }
       states.top().m_mat.m_ca = c;
+		} else if(EqualStr(line, "alpha")) {
+			float c;
+			int nread = sscanf(line.c_str(), "%s %f", dummy, &c);
+			if (nread!=2) {
+				cerr << "ERROR: " << line << endl;
+			}
+			states.top().m_mat.m_alpha = c;
+		} else if(EqualStr(line, "ri")) {
+			float c;
+			int nread = sscanf(line.c_str(), "%s %f", dummy, &c);
+			if (nread != 2) {
+				cerr << "ERROR: " << line << endl;
+			}
+			states.top().m_mat.m_ri = c;
     } else if(EqualStr(line, "background")) {
       XVec3f c;
       int nread = sscanf(line.c_str(), "%s %f %f %f", dummy, &c.x(), &c.y(), &c.z());

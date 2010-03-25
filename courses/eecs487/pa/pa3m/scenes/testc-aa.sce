@@ -13,26 +13,28 @@ ny 300
 #options
 
 max_recursion 4
-aasample 4
+#aasample 4
 		
 # scene
 
-background 0 0 0.6
+background 0 0 0
 
 ca 0.1 0.1 0.1
 
 rotate 36 0 0 1
 
+#translate 0 0 -0.00001
 {
 	#ground
 	cr 0.4 0.5 0.4 
 	cp 0.4 0.4 0.4
  
-	triangle -3 -10 0  3 -10 0  3 10 0
+triangle -3 -10 0  3 -10 0  3 10 0
 	triangle -3 -10 0  3 10 0 -3 10 0
 }
 
 
+#	translate 0 0 0.00001
 
 {	
 	translate -1 0.6 -0.3
@@ -47,6 +49,8 @@ rotate 36 0 0 1
 	scale 0.5 0.5 0.5
 	cr 0.8 0.4 0.4 
 	cp 0.0 0.0 0.0
+	alpha 0
+	ri 1.3
 	object_flat cube.ob
 }
 
@@ -56,8 +60,12 @@ rotate 36 0 0 1
 	scale 0.5 0.5 0.5
 	cr 0.5 0.4 0.9 
 	cp 0.0 0.0 0.0
+<<<<<<< .mine
+	alpha 1
+=======
 	alpha 0.3
 	ri 1.2
+>>>>>>> .r60
 	object_flat cube.ob
 }
 

@@ -138,7 +138,7 @@ public:
             std::cerr << "cannot read normal before vertex position" << endl;
             return false;
           }
-          normal.normalize();
+          normal /= normal.normalize();
           m_vs[nn].m_normal = normal;
           ++nn;
         } else {

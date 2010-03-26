@@ -12,7 +12,7 @@ ny 300
 
 #options
 
-max_recursion 4
+max_recursion 2
 aasample 0
 		
 # scene
@@ -59,9 +59,11 @@ ca 0.1 0.1 0.1
 }
 
 {	
-	translate -2 0.6 -0.3
+	#translate -2 0.6 -0.3
+	translate -2 0.6 -1
 	rotate 25 0 1 0
 	scale 0.1 0.1 1.5
+	alpha 1
 	ri 1
 	cylinder 
 }

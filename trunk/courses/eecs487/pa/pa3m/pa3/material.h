@@ -1,3 +1,9 @@
+/*
+ * Name: 			Fu Yu
+ * UMID: 			33551750
+ * uniqname:	yufu
+ */
+
 #ifndef _MATERIAL_H
 #define _MATERIAL_H
 

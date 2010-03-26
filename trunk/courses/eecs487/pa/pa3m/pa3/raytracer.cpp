@@ -121,7 +121,7 @@ XVec3f diffuse(const hitinfo_t & hit, ILight * light, const SceneT & scene)
 		float hit_alpha = scene.alpha_intersect(shadow_ray, shadow_hit);
 		//if ((!scene.Intersect(shadow_ray, shadow_hit)) ||
 			//	shadow_hit.m_t < 0 || shadow_hit.m_t > 1)
-		if (fabs(hit_alpha) > 10 * EPSILON)
+		if (fabs(hit_alpha) > EPSILON)
 			color += light->Color() * hit_alpha;
 	}
 	color /= samplePos.size();
@@ -180,9 +180,15 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level, stack<float> ris) {
 						 refl_color * hit.m_mat.m_cp * pow(max(0.0f, n.dot(h)), hit.m_mat.m_p);*/
 		color += diff_color * (hit.m_mat.m_cr * max(0.0f, n.dot(l)) +
 						 hit.m_mat.m_cp * pow(fabs(n.dot(h)), hit.m_mat.m_p));
+//color += diff_color * (hit.m_mat.m_cr * max(0.0f, n.dot(l)));
 		// How could the dot product be 0?
 	}
-	XVec3f refl_color = Trace(ray_t(hit.m_pos, 2 * n * n.dot(v) - v), level+1, ris); // Reflected color
+	XVec3f refl_dir;
+	if (n.dot(v) > 0)
+		refl_dir = 2 * n * n.dot(v) - v;
+	else
+		refl_dir = 2 * (-n) * (-n.dot(v)) - v;
+	XVec3f refl_color = Trace(ray_t(hit.m_pos, refl_dir), level+1, ris); // Reflected color
 	color += refl_color * hit.m_mat.m_cp;
 
 	if (fabs(hit.m_mat.m_alpha - 1) > EPSILON) {
@@ -220,7 +226,7 @@ XVec3f RayTracerT::Trace(const ray_t& ray, int level, stack<float> ris) {
   // YOUR CODE HERE
   // limit the recursion level here
 
-	if (level > m_opts.m_max_recursion) {
+	if (level >= m_opts.m_max_recursion) {
 		return m_scene.BackgroundColor();
 		//return XVec3f(1, 1, 1);
 	}

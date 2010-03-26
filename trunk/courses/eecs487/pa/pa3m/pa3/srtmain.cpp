@@ -1,3 +1,8 @@
+/*
+ * Name: 			Fu Yu
+ * UMID: 			33551750
+ * uniqname:	yufu
+ */
 #include <iostream>
 
 #include "scene.h"

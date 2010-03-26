@@ -117,9 +117,11 @@ XVec3f diffuse(const hitinfo_t & hit, ILight * light, const SceneT & scene)
 	XVec3f color(0.0f, 0.0f, 0.0f);
 	for (unsigned int i = 0; i < samplePos.size(); i++) {
 		XVec3f l = samplePos[i] - hit.m_pos;
+		double dist = l.normalize();
+		l = l / dist;
 		ray_t shadow_ray = ray_t(hit.m_pos, l);
 		hitinfo_t shadow_hit;
-		float hit_alpha = scene.alpha_intersect(shadow_ray, shadow_hit);
+		float hit_alpha = scene.alpha_intersect(shadow_ray, shadow_hit, dist);
 		//if (!scene.Intersect(shadow_ray, shadow_hit) || shadow_hit.m_t > 1)
 			//color += light->Color();
 		if (fabs(hit_alpha) > EPSILON)
@@ -140,9 +142,6 @@ XVec3f refract(const XVec3f & in_dir, const XVec3f & norm, float n1, float n2)
 	XVec3f rt = ri * n1 / n2 - n * (n.dot(ri) * n1 / n2 +
 				 sqrt(kernel));
 
-	/*cout << "ri is " << ri << endl;
-	cout << "rt is " << rt << endl;
-*/
 	return rt;
 }
 
@@ -169,12 +168,6 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level, stack<float> ris) {
 		XVec3f h = (l + v);
 		h = h / h.normalize();
 
-
-		/*ray_t shadow_ray = ray_t(hit.m_pos, l);
-		hitinfo_t shadow_hit;
-		XVec3f diff_color(0.0f, 0.0f, 0.0f);
-		if (!m_scene.Intersect(shadow_ray, shadow_hit))
-				diff_color = (*it)->Color();*/
 		XVec3f diff_color = diffuse(hit, (*it), m_scene);
 		
 		color += diff_color * (hit.m_mat.m_cr * max(0.0f, n.dot(l)) +
@@ -191,7 +184,6 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level, stack<float> ris) {
 	if (fabs(hit.m_mat.m_alpha - 1) > EPSILON) {
 		float n1, n2;
 		if (n.dot(v) > 0) {
-			//cout << ris.size() << endl;
 			n1 = ris.top(); 
 			n2 = hit.m_mat.m_ri;
 			ris.push(hit.m_mat.m_ri);

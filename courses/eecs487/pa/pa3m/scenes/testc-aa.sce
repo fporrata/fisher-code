@@ -13,7 +13,7 @@ ny 300
 #options
 
 max_recursion 4
-#aasample 4
+aasample 4
 		
 # scene
 
@@ -49,8 +49,6 @@ triangle -3 -10 0  3 -10 0  3 10 0
 	scale 0.5 0.5 0.5
 	cr 0.8 0.4 0.4 
 	cp 0.0 0.0 0.0
-	alpha 0
-	ri 1.3
 	object_flat cube.ob
 }
 
@@ -60,12 +58,6 @@ triangle -3 -10 0  3 -10 0  3 10 0
 	scale 0.5 0.5 0.5
 	cr 0.5 0.4 0.9 
 	cp 0.0 0.0 0.0
-<<<<<<< .mine
-	alpha 1
-=======
-	alpha 0.3
-	ri 1.2
->>>>>>> .r60
 	object_flat cube.ob
 }
 

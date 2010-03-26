@@ -32,11 +32,11 @@ bool SceneT::Intersect(const ray_t& ray, hitinfo_t& hit) const {
   return result;
 }
 
-float SceneT::alpha_intersect(const ray_t& ray, hitinfo_t& hit) const {
+float SceneT::alpha_intersect(const ray_t& ray, hitinfo_t& hit, double dist) const {
 
   GelCt::const_iterator gi;
 
-  hit.m_t = 1.0f;
+  hit.m_t = dist;
 
   hitinfo_t curhit;
   curhit.m_indir = ray.m_dir;

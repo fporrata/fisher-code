@@ -16,6 +16,7 @@ extern "C" {
 void display(void); // see raytrace.cc
 void reshape(int w, int h);
 void init(void);
+void kb(unsigned char key, int x, int y);
 
 int screen_width=640;
 int screen_height=400;
@@ -31,6 +32,7 @@ int main(int argc, char *argv[])
   init();
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
+	glutKeyboardFunc(kb);
   glutMainLoop();
   return 0;
 }

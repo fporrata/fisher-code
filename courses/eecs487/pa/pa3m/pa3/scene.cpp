@@ -46,8 +46,8 @@ float SceneT::alpha_intersect(const ray_t& ray, hitinfo_t& hit, double dist) con
   for(gi=m_gels.begin(); gi!=m_gels.end(); ++gi) {
     if((*gi)->Intersect(ray, curhit)) {
       //cerr << "intersected! " << curhit.m_t << endl;
-      if(curhit.m_t>EPSILON && curhit.m_t<hit.m_t) {
-        hit = curhit;
+      if(curhit.m_t>EPSILON && curhit.m_t < dist) {
+				if (hit.m_t > curhit.m_t) hit = curhit;
         result *= (1 - curhit.m_mat.m_alpha);
       }
     }

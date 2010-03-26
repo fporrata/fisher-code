@@ -25,8 +25,10 @@ rotate 36 0 0 1
 
 {
 	#ground
-	cr 0.4 0.5 0.4 
+cr 1 0.5 0.4 
+#cr 0 0 0
 	cp 0.4 0.4 0.4
+#cp 0 0 0
  
 	triangle -3 -10 0  3 -10 0  3 10 0
 	triangle -3 -10 0  3 10 0 -3 10 0
@@ -47,8 +49,8 @@ rotate 36 0 0 1
 	scale 0.5 0.5 0.5
 	cr 0.8 0.4 0.4 
 	cp 0.0 0.0 0.0
-	ri 1.6
-	alpha 0.01
+	alpha 0.5
+	ri 1.2
 	object_flat cube.ob
 }
 
@@ -58,7 +60,6 @@ rotate 36 0 0 1
 	scale 0.5 0.5 0.5
 	cr 0.5 0.4 0.9 
 	cp 0.0 0.0 0.0
-	alpha 1
 	object_flat cube.ob
 }
 

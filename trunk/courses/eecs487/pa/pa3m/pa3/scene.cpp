@@ -22,7 +22,7 @@ bool SceneT::Intersect(const ray_t& ray, hitinfo_t& hit) const {
   for(gi=m_gels.begin(); gi!=m_gels.end(); ++gi) {
     if((*gi)->Intersect(ray, curhit)) {
       //cerr << "intersected! " << curhit.m_t << endl;
-      if(curhit.m_t>EPSILON && curhit.m_t<hit.m_t) {
+      if(curhit.m_t > EPSILON && curhit.m_t<hit.m_t) {
         hit = curhit;
         result = true;
       }

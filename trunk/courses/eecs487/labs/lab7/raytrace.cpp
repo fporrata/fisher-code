@@ -10,6 +10,14 @@ extern "C" {
 #endif
 }
 
+extern "C" {
+#ifdef __APPLE__
+	#include <GLUT/glut.h>
+#else
+	#include <GL/glut.h>
+#endif
+}
+
 #include "point.h"
 #include "sphere.h"
 #include "plane.h"
@@ -21,9 +29,36 @@ extern int screen_width;
 extern int screen_height;
 
 Pt const eye_pos(0,0,900);
-Sphere const reflecting_sphere(-100,-80,-100,60);
+Sphere  reflecting_sphere(-100,-80,-100,60);
 
 Color raytrace(Ray const& ray, bool touched_sphere);
+
+void kb(unsigned char key, int x, int y) {
+
+		switch (key) {
+				case 'q':
+						reflecting_sphere.o.z += 10;
+						break;
+				case 'e':
+						reflecting_sphere.o.z -= 10;
+						break;
+				case 'w':
+						reflecting_sphere.o.y -= 10;
+						break;
+				case 's':
+						reflecting_sphere.o.y += 10;
+						break;
+				case 'a':
+						reflecting_sphere.o.x += 10;
+						break;
+				case 'd':
+						reflecting_sphere.o.x -= 10;
+						break;
+		}
+
+		glutPostRedisplay();
+}
+
 
 void display(void)
 {

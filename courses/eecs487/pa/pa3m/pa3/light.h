@@ -1,3 +1,9 @@
+/*
+ * Name: 			Fu Yu
+ * UMID: 			33551750
+ * uniqname:	yufu
+ */
+
 #ifndef _LIGHT_H
 #define _LIGHT_H
 

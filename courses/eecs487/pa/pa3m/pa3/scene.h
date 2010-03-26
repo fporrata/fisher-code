@@ -1,3 +1,9 @@
+/*
+ * Name: 			Fu Yu
+ * UMID: 			33551750
+ * uniqname:	yufu
+ */
+
 #ifndef _SCENE_H
 #define _SCENE_H
 

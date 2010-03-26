@@ -1,3 +1,9 @@
+/*
+ * Name: 			Fu Yu
+ * UMID: 			33551750
+ * uniqname:	yufu
+ */
+
 #ifndef _CYLINDER_H
 #define _CYLINDER_H
 
@@ -79,7 +85,7 @@ class CylinderT: public IGel {
 			hit.m_pos = ray.at(*t);
 		
 			// What if hitting the edge?
-			if (hit.m_pos.z() > EPSILON && hit.m_pos.z() < 1-EPSILON)
+			if (hit.m_pos.z() > _b + EPSILON && hit.m_pos.z() < _t-EPSILON)
 				hit.m_normal = XVec3f(hit.m_pos.x(), hit.m_pos.y(), 0.0f);
 			else
 				hit.m_normal = XVec3f(0.0f, 0.0f, -ray.m_dir.z());
@@ -92,7 +98,6 @@ class CylinderT: public IGel {
 			hit.m_normal.normalize();
 
 			return true;
-
 		}
 		
 	public:

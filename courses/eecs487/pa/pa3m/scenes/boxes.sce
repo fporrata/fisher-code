@@ -8,11 +8,11 @@ wdist 2.0
 
 fovy_deg 45
 
-nx 400
-ny 300
+nx 1200
+ny 800
 
-max_recursion 10
-aasample 3
+max_recursion 20
+aasample 8
 
 background 0 0 0
 

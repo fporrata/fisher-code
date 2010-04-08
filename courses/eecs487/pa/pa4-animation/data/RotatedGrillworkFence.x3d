@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D version='3.0' profile='Immersive' xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <head>
+    <meta content='Figure18.24TextureCoordinateRotatedGrillworkFence.x3d' name='title'/>
+    <meta content='Figure 18.24, The VRML 2.0 Sourcebook, Copyright [1997] By Andrea L. Ames, David R. Nadeau, and John L. Moreland' name='creator'/>
+    <meta content='Don Brutzman' name='translator'/>
+    <meta content='4 September 2000' name='created'/>
+    <meta content='15 September 2002' name='modified'/>
+    <meta content='A rotated grillwork texture image mapped to a rectangular face to  create a chain-link fence.  Compare Figures 18.23b and 18.24.' name='description'/>
+    <meta content='http://www.web3d.org/x3d/content/examples/Vrml2.0Sourcebook/Chapter18-TextureMapping/Figure18.24TextureCoordinateRotatedGrillworkFence.x3d' name='identifier'/>
+    <meta content='X3D-Edit, http://www.web3d.org/x3d/content/README.X3D-Edit.html' name='generator'/>
+    <meta name='license' content='../../license.html'/>
+  </head>
+  <Scene>
+    <Viewpoint description='Fence made of rotated/translated texture grillwork'/>
+    <!-- Background added to show transaprency, may need to remove it if you reuse this scene -->
+    <Background groundAngle='1.57' groundColor='0.1 0.1 0,  0.1 0.4 0' skyAngle='0.1, 0.2, 1.57' skyColor='1 1 1, 0 0 1, 0 0 1, 0.1 0.1 1'/>
+    <Group>
+        <Shape DEF='Post'>
+          <Cylinder radius='0.1'/>
+        </Shape>
+        <Transform translation='-4 0 0'>
+          <Shape USE='Post'/>
+        </Transform>
+        <Transform translation='4 0 0'>
+          <Shape USE='Post'/>
+        </Transform>
+      <Shape>
+        <Appearance>
+          <!-- no material, use emissive texturing. Not really a video, just a .jpg image. -->
+          <ImageTexture url='"grill.png"&#xA;"http://www.web3d.org/x3d/content/examples/Vrml2.0Sourcebook/Chapter18-TextureMapping/grill.png"'/>
+          <TextureTransform center='0.5 0.5' rotation='0.785' scale='32 32'/>
+        </Appearance>
+        <IndexedFaceSet DEF='Screen' coordIndex='0, 1, 2, 3' solid='false' texCoordIndex='0, 1, 2, 3'>
+          <Coordinate point='-4 -1 0.1,  4 -1 0.1,  4 1 0.1,  -4 1 0.1'/>
+          <TextureCoordinate point='0 0,  1 0,  1 1,  0 1'/>
+        </IndexedFaceSet>
+      </Shape>
+    </Group>
+  </Scene>
+</X3D>

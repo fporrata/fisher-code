@@ -28,7 +28,22 @@ void evaluate_spline(double u,        /* 0<= parameter <= 1 */
     f[i] = a[0][i] + a[1][i]*u + a[2][i]*u2 + a[3][i]*u3;
 }
 
+void calculate_quad_spline(GLfloat p[4][4], GLfloat a[3][4])
+{
+	GLfloat C[4][4] = 
+	{{1, 0, 0, 0},
+	 {1, 0.5, 0.25, 0},
+	 {1, 1, 1, 0},
+	 {0, 0, 0, 1}};
 
+	GLfloat B[4][4];
+
+	calculate_basis_from_constraint(C, B);
+
+	int i;
+	for (i = 0; i < 4; ++i)
+		lin_comb3(B[i][0], p[0], B[i][1], p[1], B[i][2], p[2], a[i]);
+}
 
 
 

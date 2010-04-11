@@ -415,6 +415,11 @@ void X3ImageTexture::Render() const {
 	// DO NOT call glTexImage2D or gluBuild2DMipmaps inside this
 	// function!!!!!!!!!!
 	
+	glBindTexture(GL_TEXTURE_2D, texture_name_);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, 
+			(repeat_s_?GL_REPEAT:GL_CLAMP));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+			(repeat_t_?GL_REPEAT:GL_CLAMP));
 }
 
 void X3ImageTexture::DefaultRender() {

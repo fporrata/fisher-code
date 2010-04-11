@@ -128,7 +128,7 @@ XVec3f RayTracerT::Shade(const hitinfo_t& hit, int level) {
 		ray_t shadow_ray = ray_t(hit.m_pos, (*it)->SamplePos() - hit.m_pos);
 		hitinfo_t shadow_hit;
 		XVec3f diff_color(0.0f, 0.0f, 0.0f);
-		if ((!m_scene.Intersect(shadow_ray, shadow_hit)) || shadow_hit.m_t < 0 || shadow_hit.m_t > 1)
+		if ((!m_scene.Intersect(shadow_ray, shadow_hit)))
 			diff_color = (*it)->Color();
 		
 		color += diff_color * hit.m_mat.m_cr * max(0.0f, n.dot(l)) + 

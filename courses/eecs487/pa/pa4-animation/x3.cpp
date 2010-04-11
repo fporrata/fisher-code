@@ -444,6 +444,11 @@ void X3ImageTexture::SetupTexture(const Image* image) {
 	// YOUR CODE HERE: modify this function to generate texture name,
 	// specify texture image/mipmaps, as well as possibly set some 
 	// texture parameters.
+	glGenTextures(1, &texture_name_);
+	glBindTexture(GL_TEXTURE_2D, texture_name_);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, image->width(), image->height(), 
+			GL_RGBA, GL_UNSIGNED_BYTE, image->get_pixels()); 
+	
 }
 
 X3IndexedFaceSet::X3IndexedFaceSet(const char** atts) 

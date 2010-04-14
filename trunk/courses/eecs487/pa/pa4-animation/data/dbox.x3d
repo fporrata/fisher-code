@@ -15,6 +15,7 @@
   <Scene>
     <!-- This NavigationInfo node is added to many scenes, making examination of objects easier. -->
     <Shape>
+			    <Viewpoint description='Default view 0 0 10'/>
       <!-- When attribute values are not specified, the default values from the X3D (or VRML) Specification are used. -->
       <Appearance>
         <Material/>

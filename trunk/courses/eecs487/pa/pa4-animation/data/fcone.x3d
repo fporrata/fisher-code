@@ -14,6 +14,8 @@
   </head>
   <Scene>
     <!-- This NavigationInfo node is added to many scenes, making examination of objects easier. -->
+		    <Viewpoint description='Default view 0 0 10'/>
+				    <Viewpoint description='Farther view 0 0 20' position='0 0 20'/>
     <Shape>
       <!-- When attribute values are not specified, the default values from the VRML Specification are used. -->
       <Cone bottomRadius='3.5' height='1.5'/>

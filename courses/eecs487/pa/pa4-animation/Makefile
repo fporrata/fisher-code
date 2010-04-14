@@ -6,7 +6,7 @@ STUDENT_OTHER_FILES = ./data ./common
 
 CC = g++
 # INCLUDES = ./common/include
-CFLAGS = -g -m32 -Wall $(INCLUDES) 
+CFLAGS = -g  -Wall $(INCLUDES) -L/opt/local/lib -I/opt/local/include
 ifeq ($(shell uname), Darwin)
   LIBS = -framework OpenGL -framework GLUT -lm -lexpat -lpng -ljpeg
 else

@@ -14,6 +14,8 @@ class XVec {
 public:
   // Constructors.
   XVec() {
+		for (int i = 0; i < dim; ++i)
+			m_v[i] = 0;
   }
 
   explicit XVec(real_type f) { 

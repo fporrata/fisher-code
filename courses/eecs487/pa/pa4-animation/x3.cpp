@@ -1,3 +1,7 @@
+/*
+ * Name: Fu Yu
+ * uniqname: yufu
+ */
 #include "x3.h"
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -18,6 +22,69 @@ static void erase_char(string& s, char ch) {
 	}
 }
 
+template<class T>
+T catmull_rom_spline(const T & p0, const T & p1, const T & p2, const T & p3, float t)
+{
+	/*XVec4f B[] = {XVec4f(0, 1, 0, 0),
+								XVec4f(-0.5, 0, 0.5, 0),
+								XVec4f(1, -2.5, 2, -0.5),
+								XVec4f(-0.5, 1.5, -1.5, 0.5)};*/
+	XVec4f B[] = {XVec4f(0, -0.5, 1, -0.5),
+								XVec4f(1, 0, -2.5, 1.5),
+								XVec4f(0, 0.5, 2, -1.5),
+								XVec4f(0, 0, -0.5, 0.5)};
+	XVec4f u = XVec4f(1, t, t*t, t*t*t);
+	float a[4];
+	for (int i = 0; i < 4; i++)
+		a[i] = u.dot(B[i]);
+	return a[0] * p0 + a[1] * p1 + a[2] * p2 + a[3] * p3;
+}
+
+template<class T>
+T x3d_catmull_rom_spline(const T & v0, const T & v1, const T & T0, const T & T1, float t)
+{
+	XVec4f H[] = {XVec4f(2, -3, 0, 1),
+								XVec4f(-2, 3, 0, 0),
+								XVec4f(1, -2, 1, 0),
+								XVec4f(1, -1, 0, 0)};
+	XVec4f S(t*t*t, t*t, t, 1);
+	float a[4];
+	for (int i = 0; i < 4; i++)
+		a[i] = S.dot(H[i]);
+	return a[0] * v0 + a[1] * v1 + a[2] * T0 + a[3] * T1;
+}
+
+float operator * (const XVec4f & p1, const XVec4f & p2)
+{
+	return p1.dot(p2);
+}
+
+template<class T>
+void x3d_catmull_rom_velocity(const vector<float> & key, const vector<T> & keyValue, int index, T & T0, T & T1)
+{
+	if (index == 0 || index == (int)key.size() - 1) T0 = T1 = T();
+	else {
+		T tmp = (keyValue[index+1] - keyValue[index-1]) / 2;
+		float Fm = 2 * (key[index+1] - key[index]) / (key[index+1] - key[index-1]);
+		float Fa = 2 * (key[index] - key[index-1]) / (key[index+1] - key[index-1]);
+		T0 = Fa * tmp;
+		T1 = Fm * tmp;
+	}
+}
+
+template<class T>
+T quad_spline(const T & p0, const T & p1, const T & p2, float t)
+{
+	XVec3f B[] = {XVec3f(1, 0, 0),
+								XVec3f(-0.5, 1, 0),
+								XVec3f(0.125, -0.5, 0.5)};
+	XVec3f u = XVec3f(1, t, t*t);
+	float a[3];
+	for (int i = 0; i < 3; i++)
+		a[i] = u.dot(B[i]);
+	return a[0] * p0 + a[1] * p1 + a[2] * p2;
+}
+
 void X3Appearance::Add(X3NodeType type, X3Node* node) {
 	if(type==X3NODE_MATERIAL) {
 		material_ = reinterpret_cast<X3Material*>(node);
@@ -29,7 +96,6 @@ void X3Appearance::Add(X3NodeType type, X3Node* node) {
 		X3Node::Add(type, node);
 	}
 }
-
 
 void X3Appearance::Render() const {
 	if(material_) {
@@ -81,41 +147,66 @@ X3Box::X3Box(const char **atts) : size_(2.0f, 2.0f, 2.0f) {
 void X3Box::Render() const {
 	// YOUR CODE HERE: modify this function to specify texture coordinates
 	// to enable textured boxes.
+	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
     glNormal3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(1.0f, 1.0f);
     glVertex3f( 0.5f*size_(0),  0.5f*size_(1),  0.5f*size_(2));
+		glTexCoord2f(0.0f, 1.0f);
     glVertex3f(-0.5f*size_(0),  0.5f*size_(1),  0.5f*size_(2));
+		glTexCoord2f(0.0f, 0.0f);
     glVertex3f(-0.5f*size_(0), -0.5f*size_(1),  0.5f*size_(2));
+		glTexCoord2f(1.0f, 0.0f);
     glVertex3f( 0.5f*size_(0), -0.5f*size_(1),  0.5f*size_(2));
 	
     glNormal3f(0.0f, 0.0f, -1.0f);
+		glTexCoord2f(0.0f, 0.0f);
     glVertex3f( 0.5f*size_(0), -0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(1.0f, 0.0f);
     glVertex3f(-0.5f*size_(0), -0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(1.0f, 1.0f);
     glVertex3f(-0.5f*size_(0),  0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(0.0f, 1.0f);
     glVertex3f( 0.5f*size_(0),  0.5f*size_(1), -0.5f*size_(2));
 	
     glNormal3f(1.0f, 0.0f, 0.0f);
+		glTexCoord2f(1.0f, 1.0f);
     glVertex3f( 0.5f*size_(0),  0.5f*size_(1),  0.5f*size_(2));
+		glTexCoord2f(1.0f, 0.0f);
     glVertex3f( 0.5f*size_(0), -0.5f*size_(1),  0.5f*size_(2));
+		glTexCoord2f(0.0f, 0.0f);
     glVertex3f( 0.5f*size_(0), -0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(0.0f, 1.0f);
     glVertex3f( 0.5f*size_(0),  0.5f*size_(1), -0.5f*size_(2));
 	
     glNormal3f(-1.0f, 0.0f, 0.0f);
+		glTexCoord2f(0.0f, 1.0f);
     glVertex3f(-0.5f*size_(0),  0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(0.0f, 0.0f);
     glVertex3f(-0.5f*size_(0), -0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(1.0f, 0.0f);
     glVertex3f(-0.5f*size_(0), -0.5f*size_(1),  0.5f*size_(2));
+		glTexCoord2f(1.0f, 1.0f);
     glVertex3f(-0.5f*size_(0),  0.5f*size_(1),  0.5f*size_(2));
 	
     glNormal3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
     glVertex3f( 0.5f*size_(0),  0.5f*size_(1),  0.5f*size_(2));
+		glTexCoord2f(1.0f, 1.0f);
     glVertex3f( 0.5f*size_(0),  0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(0.0f, 1.0f);
     glVertex3f(-0.5f*size_(0),  0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(0.0f, 0.0f);
     glVertex3f(-0.5f*size_(0),  0.5f*size_(1),  0.5f*size_(2));
 	
     glNormal3f(0.0f, -1.0f, 0.0f);
+		glTexCoord2f(0.0f, 1.0f);
     glVertex3f(-0.5f*size_(0), -0.5f*size_(1),  0.5f*size_(2));
+		glTexCoord2f(0.0f, 0.0f);
     glVertex3f(-0.5f*size_(0), -0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(1.0f, 0.0f);
     glVertex3f( 0.5f*size_(0), -0.5f*size_(1), -0.5f*size_(2));
+		glTexCoord2f(1.0f, 1.0f);
     glVertex3f( 0.5f*size_(0), -0.5f*size_(1),  0.5f*size_(2));
 	glEnd();
 }
@@ -156,12 +247,17 @@ void X3Cone::Render() const {
 	// to enable textured cones.
 	const int N = 10;
 	const float step = 2.0f * M_PI / N;
+	glEnable(GL_TEXTURE_2D);
 	if(side_) {
 		glBegin(GL_QUAD_STRIP);
 		for(int k = 0; k < N+1; ++k) {
 			glNormal3f(cos(k*step), bottom_radius_ / height_, sin(k*step));
+			float s = k + 3.0 * N / 4;
+			while (s > N) s -= N;
+			glTexCoord2f(s, 0.0f);
 			glVertex3f(bottom_radius_*cos(k*step), -0.5f*height_, 
 					   bottom_radius_*sin(k*step));
+			glTexCoord2f(s, 1.0f);
 			glVertex3f(0.0f, 0.5f*height_, 0.0f);
 		}
 		glEnd();
@@ -169,8 +265,10 @@ void X3Cone::Render() const {
 	if(bottom_) {
 		glBegin(GL_TRIANGLE_FAN);
 		glNormal3f(0.0f, -1.0f, 0.0f);
+		glTexCoord2f(0.5f, 0.5f);
 		glVertex3f(0.0f, -0.5f*height_, 0.0f);
 		for(int k = 0; k < N+1; ++k) {
+			glTexCoord2f(0.5 + 0.5 * cos(k*step+M_PI/2), 0.5 + 0.5 * sin(k*step+M_PI/2));
 			glVertex3f(bottom_radius_*cos(k*step), -0.5f*height_, 
 					   bottom_radius_*sin(k*step));
 		}
@@ -298,13 +396,17 @@ height_(2.0f), radius_(1.0f)
 void X3Cylinder::Render() const {
 	// YOUR CODE HERE: modify this function to specify texture coordinates
 	// to enable textured cylinders.
+	glEnable(GL_TEXTURE_2D);
+
 	const int N = 20;
 	const float step = 2.0f * M_PI / N;
 	if(top_) {
 		glBegin(GL_TRIANGLE_FAN);
 		glNormal3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(0.5, 0.5);
 		glVertex3f(0.0f, 0.5f*height_, 0.0f);
 		for(int k = 0; k < N+1; ++k) {
+			glTexCoord2f(0.5 - 0.5 * sin(k*step), 0.5 + 0.5 * cos(k*step));
 			glVertex3f(-radius_*sin(k*step), 0.5f*height_, -radius_*cos(k*step));
 		}
 		glEnd();
@@ -314,8 +416,10 @@ void X3Cylinder::Render() const {
 		glFrontFace(GL_CW);
 		glBegin(GL_TRIANGLE_FAN);
 		glNormal3f(0.0f, -1.0f, 0.0f);
+		glTexCoord2f(0.5f, 0.5f);
 		glVertex3f(0.0f, -0.5f*height_, 0.0f);
 		for(int k = 0; k < N+1; ++k) {
+			glTexCoord2f(0.5 + 0.5 * sin(k*step), 0.5 + 0.5 * cos(k*step));
 			glVertex3f(-radius_*sin(k*step), -0.5f*height_, -radius_*cos(k*step));
 		}
 		glEnd();
@@ -326,7 +430,9 @@ void X3Cylinder::Render() const {
 		glBegin(GL_QUAD_STRIP);
 		for(int k = 0; k < N+1; ++k) {
 			glNormal3f(-sin(k*step), 0.0f, -cos(k*step));
+			glTexCoord2f((float)k / N, 1.0f);
 			glVertex3f(-radius_*sin(k*step), 0.5f*height_, -radius_*cos(k*step));
+			glTexCoord2f((float)k / N, 0.0f);
 			glVertex3f(-radius_*sin(k*step), -0.5f*height_, -radius_*cos(k*step));
 		}
 		glEnd();
@@ -451,8 +557,16 @@ void X3ImageTexture::SetupTexture(const Image* image) {
 	// texture parameters.
 	glGenTextures(1, &texture_name_);
 	glBindTexture(GL_TEXTURE_2D, texture_name_);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, image->width(), image->height(), 
-			GL_RGBA, GL_UNSIGNED_BYTE, image->get_pixels()); 
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 
+										(image->hasAlpha()?GL_RGBA:GL_RGB), 
+										image->width(), image->height(), 
+										(image->hasAlpha()?GL_RGBA:GL_RGB), 
+										GL_UNSIGNED_BYTE, image->get_pixels()); 
+	if (image->hasAlpha()) {
+		glEnable(GL_ALPHA_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
 	
 }
 
@@ -545,6 +659,7 @@ void X3IndexedFaceSet::Render() const {
 	// 
 	// If texture_coordinate==NULL you need not worry about specifying texture
 	// coordinates. Otherwise, do specify them.
+	glEnable(GL_TEXTURE_2D);
 	
 	if(!coordinate_)
 		return;
@@ -552,22 +667,36 @@ void X3IndexedFaceSet::Render() const {
 	glBegin(GL_TRIANGLES);
 	for(int k = 0; k < (int)triangles_.size(); ++k) {
 		glNormal3fv(normals_[triangles_[k](0)]);
+		if (texture_coordinate_)
+			glTexCoord2fv(texture_coordinate_->point(tex_triangles_[k](0)));
 		glVertex3fv(coordinate_->point(triangles_[k](0)));
 		glNormal3fv(normals_[triangles_[k](1)]);
+		if (texture_coordinate_)
+			glTexCoord2fv(texture_coordinate_->point(tex_triangles_[k](1)));
 		glVertex3fv(coordinate_->point(triangles_[k](1)));
 		glNormal3fv(normals_[triangles_[k](2)]);
+		if (texture_coordinate_)
+			glTexCoord2fv(texture_coordinate_->point(tex_triangles_[k](2)));
 		glVertex3fv(coordinate_->point(triangles_[k](2)));
 	}
 	glEnd();
 	glBegin(GL_QUADS);
 	for(int k = 0; k < (int)quads_.size(); ++k) {
 		glNormal3fv(normals_[quads_[k](0)]);
+		if (texture_coordinate_)
+			glTexCoord2fv(texture_coordinate_->point(tex_quads_[k](0)));
 		glVertex3fv(coordinate_->point(quads_[k](0)));
 		glNormal3fv(normals_[quads_[k](1)]);
+		if (texture_coordinate_)
+			glTexCoord2fv(texture_coordinate_->point(tex_quads_[k](1)));
 		glVertex3fv(coordinate_->point(quads_[k](1)));
 		glNormal3fv(normals_[quads_[k](2)]);
+		if (texture_coordinate_)
+			glTexCoord2fv(texture_coordinate_->point(tex_quads_[k](2)));
 		glVertex3fv(coordinate_->point(quads_[k](2)));
 		glNormal3fv(normals_[quads_[k](3)]);
+		if (texture_coordinate_)
+			glTexCoord2fv(texture_coordinate_->point(tex_quads_[k](3)));
 		glVertex3fv(coordinate_->point(quads_[k](3)));
 	}
 	glEnd();
@@ -839,7 +968,17 @@ rotation_t X3OrientationInterpolator::LinearInterpolation(float time) {
 	int index = FindKeyInterval(time);
 	
 	// YOUR CODE HERE: do linear interpolation of rotation values
-	return keyValue_[0];
+	rotation_t value;
+	if (index == -1) value = keyValue_[0];
+	else if (index == (int)keyValue_.size() -1) value = keyValue_.back();
+	else {
+		float ratio = (time - key()[index]) / (key()[index+1] - key()[index]);
+		value.axis = keyValue_[index].axis + 
+								(keyValue_[index+1].axis - keyValue_[index].axis) * ratio;
+		value.angle_rad = keyValue_[index].angle_rad + 
+						(keyValue_[index+1].angle_rad - keyValue_[index].angle_rad) * ratio;
+	}
+	return value;
 }
 
 X3PositionInterpolator::X3PositionInterpolator(const char** atts) 
@@ -885,7 +1024,15 @@ XVec3f X3PositionInterpolator::LinearInterpolation(float time) {
 	int index = FindKeyInterval(time);
 	
 	// YOUR CODE HERE: do linear interpolation of position values
-	return keyValue_[0];
+	XVec3f value;
+	if (index == -1) value = keyValue_[0];
+	else if (index == (int)keyValue_.size() -1) value = keyValue_.back();
+	else
+		value = keyValue_[index] + 
+						(keyValue_[index+1] - keyValue_[index]) * 
+						(time - key()[index]) / (key()[index+1] - key()[index]);
+
+	return value;
 }
 
 
@@ -895,7 +1042,45 @@ XVec3f X3PositionInterpolator::SmoothInterpolation(float time) {
 	int index = FindKeyInterval(time);
 	
 	// YOUR CODE HERE: do spline interpolation of position values
-	return keyValue_[0];
+	XVec3f value;
+	/*if (index == -1) value = keyValue_[0];
+	else if (index == (int)keyValue_.size() - 1) value = keyValue_.back();
+	else {
+		if (index == 0)
+			value = quad_spline(keyValue_[0], keyValue_[1], keyValue_[2],
+													0.5 * (time - key()[0]) / (key()[1] - key()[0]));
+					value = keyValue_[index] + 
+						(keyValue_[index+1] - keyValue_[index]) * 
+						(time - key()[index]) / (key()[index+1] - key()[index]);
+
+		else if (index == (int)keyValue_.size() - 2) {
+			int N = keyValue_.size();
+			value = quad_spline(keyValue_[N-3], keyValue_[N-2], keyValue_[N-1],
+								0.5 + 0.5 * (time - key()[N-2]) / (key()[N-1] - key()[N-2]));
+		value = keyValue_[index] + 
+						(keyValue_[index+1] - keyValue_[index]) * 
+						(time - key()[index]) / (key()[index+1] - key()[index]);
+
+		} else {
+			float u = (time - key()[index]) / (key()[index+1] - key()[index]);
+			value = catmull_rom_spline(keyValue_[index-1], keyValue_[index],
+																 keyValue_[index+1], keyValue_[index+2], u);
+		}
+	}*/
+	if (index == -1) value = keyValue_[0];
+	else if (index == (int)keyValue_.size()-1) value = keyValue_.back();
+	else {
+		XVec3f v0 = keyValue_[index];
+		XVec3f v1 = keyValue_[index+1];
+		XVec3f T00, T01, T10, T11;
+		x3d_catmull_rom_velocity(key(), keyValue_, index, T00, T01);
+		x3d_catmull_rom_velocity(key(), keyValue_, index+1, T10, T11);
+		value = x3d_catmull_rom_spline(v0, v1, T00, T11, 
+				(time-key()[index])/(key()[index+1] - key()[index]));
+	}
+	
+
+	return value;
 }
 
 X3ScalarInterpolator::X3ScalarInterpolator(const char** atts) 
@@ -940,7 +1125,15 @@ float X3ScalarInterpolator::LinearInterpolation(float time) {
 	int index = FindKeyInterval(time);
 	
 	// YOUR CODE HERE: do linear interpolation of scalar values
-	return keyValue_[0];
+	float value;
+	if (index == -1) value = keyValue_[0];
+	else if (index == (int)keyValue_.size() -1) value = keyValue_.back();
+	else
+		value = keyValue_[index] + 
+						(keyValue_[index+1] - keyValue_[index]) * 
+						(time - key()[index]) / (key()[index+1] - key()[index]);
+	return value;
+
 }
 
 float X3ScalarInterpolator::SmoothInterpolation(float time) {
@@ -949,7 +1142,42 @@ float X3ScalarInterpolator::SmoothInterpolation(float time) {
 	int index = FindKeyInterval(time);
 	
 	// YOUR CODE HERE: do spline interpolation of scalar values
-	return keyValue_[0];
+	float value;
+	/*if (index == -1) value = keyValue_[0];
+	else if (index == (int)keyValue_.size() - 1) value = keyValue_.back();
+	else {
+		if (index == 0)
+			value = quad_spline(keyValue_[0], keyValue_[1], keyValue_[2],
+													0.5 * (time - key()[0]) / (key()[1] - key()[0]));
+				//	value = keyValue_[index] + 
+				//		(keyValue_[index+1] - keyValue_[index]) * 
+				//		(time - key()[index]) / (key()[index+1] - key()[index]);
+		else if (index == (int)keyValue_.size() - 2) {
+			int N = keyValue_.size();
+			value = quad_spline(keyValue_[N-3], keyValue_[N-2], keyValue_[N-1],
+								0.5 + 0.5 * (time - key()[N-2]) / (key()[N-1] - key()[N-2]));
+		//value = keyValue_[index] + 
+			//			(keyValue_[index+1] - keyValue_[index]) * 
+				//		(time - key()[index]) / (key()[index+1] - key()[index]);
+		} else {
+			float u = (time - key()[index]) / (key()[index+1] - key()[index]);
+			value = catmull_rom_spline(keyValue_[index-1], keyValue_[index],
+																 keyValue_[index+1], keyValue_[index+2], u);
+		}
+	}*/
+	if (index == -1) value = keyValue_[0];
+	else if (index == (int)keyValue_.size()-1) value = keyValue_.back();
+	else {
+		float v0 = keyValue_[index];
+		float v1 = keyValue_[index+1];
+		float T00, T01, T10, T11;
+		x3d_catmull_rom_velocity(key(), keyValue_, index, T00, T01);
+		x3d_catmull_rom_velocity(key(), keyValue_, index+1, T10, T11);
+		value = x3d_catmull_rom_spline(v0, v1, T00, T11, 
+				(time-key()[index])/(key()[index+1] - key()[index]));
+	}
+
+	return value;
 }
 
 
@@ -1087,6 +1315,11 @@ translation_(0.0f, 0.0f)
 
 void X3TextureTransform::Render() const {
 	// YOUR CODE HERE: implement texture transform as described in X3D specs.
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();
+	glTranslatef(translation_(0), translation_(1), 0.0);
+	glRotatef(rotation_rad_, center_(0), center_(1), 0.0);
+	glScalef(scale_(0), scale_(1), 1.0);
 }
 
 void X3TextureTransform::DefaultRender() {

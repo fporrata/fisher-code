@@ -147,7 +147,6 @@ X3Box::X3Box(const char **atts) : size_(2.0f, 2.0f, 2.0f) {
 void X3Box::Render() const {
 	// YOUR CODE HERE: modify this function to specify texture coordinates
 	// to enable textured boxes.
-	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
     glNormal3f(0.0f, 0.0f, 1.0f);
 		glTexCoord2f(1.0f, 1.0f);
@@ -247,7 +246,6 @@ void X3Cone::Render() const {
 	// to enable textured cones.
 	const int N = 10;
 	const float step = 2.0f * M_PI / N;
-	glEnable(GL_TEXTURE_2D);
 	if(side_) {
 		glBegin(GL_QUAD_STRIP);
 		for(int k = 0; k < N+1; ++k) {
@@ -268,7 +266,7 @@ void X3Cone::Render() const {
 		glTexCoord2f(0.5f, 0.5f);
 		glVertex3f(0.0f, -0.5f*height_, 0.0f);
 		for(int k = 0; k < N+1; ++k) {
-			glTexCoord2f(0.5 + 0.5 * cos(k*step+M_PI/2), 0.5 + 0.5 * sin(k*step+M_PI/2));
+			glTexCoord2f(0.5 + 0.5 * cos(k*step+M_PI), 0.5 + 0.5 * sin(k*step+M_PI));
 			glVertex3f(bottom_radius_*cos(k*step), -0.5f*height_, 
 					   bottom_radius_*sin(k*step));
 		}
@@ -396,7 +394,6 @@ height_(2.0f), radius_(1.0f)
 void X3Cylinder::Render() const {
 	// YOUR CODE HERE: modify this function to specify texture coordinates
 	// to enable textured cylinders.
-	glEnable(GL_TEXTURE_2D);
 
 	const int N = 20;
 	const float step = 2.0f * M_PI / N;
@@ -526,6 +523,7 @@ void X3ImageTexture::Render() const {
 			(repeat_s_?GL_REPEAT:GL_CLAMP));
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
 			(repeat_t_?GL_REPEAT:GL_CLAMP));
+	glEnable(GL_TEXTURE_2D);
 }
 
 void X3ImageTexture::DefaultRender() {
@@ -659,7 +657,6 @@ void X3IndexedFaceSet::Render() const {
 	// 
 	// If texture_coordinate==NULL you need not worry about specifying texture
 	// coordinates. Otherwise, do specify them.
-	glEnable(GL_TEXTURE_2D);
 	
 	if(!coordinate_)
 		return;
@@ -1317,9 +1314,11 @@ void X3TextureTransform::Render() const {
 	// YOUR CODE HERE: implement texture transform as described in X3D specs.
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
-	glTranslatef(translation_(0), translation_(1), 0.0);
-	glRotatef(rotation_rad_, center_(0), center_(1), 0.0);
+	glTranslatef(-center_(0), -center_(1), 0.0);
 	glScalef(scale_(0), scale_(1), 1.0);
+	glRotatef(rotation_rad_, center_(0), center_(1), 0.0);
+	glTranslatef(center_(0), center_(1), 0.0);
+	glTranslatef(translation_(0), translation_(1), 0.0);
 }
 
 void X3TextureTransform::DefaultRender() {

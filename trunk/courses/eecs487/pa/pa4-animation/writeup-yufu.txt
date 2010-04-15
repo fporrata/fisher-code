@@ -1,0 +1,3 @@
+1. My platform is Mac OS X
+2. In the humanoid animation, for each part of the body, the start point is always the joint, which separate the movement of each part. 
+3. I think more functions will be fun.

@@ -14,13 +14,16 @@
   </head>
   <Scene>
     <!-- This NavigationInfo node is added to many scenes, making examination of objects easier. -->
+      <PointLight ambientIntensity='0.1' color='1 1 1' intensity='0.8' location='0 10 0'/>
     <Shape>
+
 			    <Viewpoint description='Default view 0 0 10'/>
       <!-- When attribute values are not specified, the default values from the X3D (or VRML) Specification are used. -->
       <Appearance>
-        <Material/>
+        <Material diffuseColor='1 1 1'/>
+				<ImageTexture url="face.jpg" />
       </Appearance>
-      <Box/>
+      <Box size='1 1 1'/>
     </Shape>
   </Scene>
 </X3D>

@@ -21,6 +21,7 @@
       <Cone bottomRadius='3.5' height='1.5'/>
       <Appearance>
         <Material diffuseColor='.9 .3 .6'/>
+				<ImageTexture url='cylhead.jpg' />
       </Appearance>
     </Shape>
   </Scene>
